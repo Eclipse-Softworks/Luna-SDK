@@ -5,6 +5,8 @@ from __future__ import annotations
 import re
 
 from luna.auth.types import AuthProvider
+from luna.errors.base import AuthenticationError
+from luna.errors.codes import ErrorCode
 
 
 class ApiKeyAuth(AuthProvider):
@@ -30,9 +32,17 @@ class ApiKeyAuth(AuthProvider):
             ValueError: If API key is invalid
         """
         if not api_key:
-            raise ValueError("API key is required")
+            raise AuthenticationError(
+                code=ErrorCode.AUTH_INVALID_KEY,
+                message="API key is required",
+                request_id="local",
+            )
         if not self._is_valid_api_key(api_key):
-            raise ValueError("Invalid API key format. Expected: lk_<env>_<key>")
+            raise AuthenticationError(
+                code=ErrorCode.AUTH_INVALID_KEY,
+                message="Invalid API key format. Expected: lk_<env>_<key>",
+                request_id="local",
+            )
         self._api_key = api_key
 
     async def get_headers(self) -> dict[str, str]:

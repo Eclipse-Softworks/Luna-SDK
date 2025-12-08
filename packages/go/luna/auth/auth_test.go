@@ -59,7 +59,7 @@ func TestAPIKeyAuth(t *testing.T) {
 
 func TestTokenAuth(t *testing.T) {
 	t.Run("creates auth with access token", func(t *testing.T) {
-		a := auth.NewTokenAuth("access-token", "refresh-token")
+		a := auth.NewTokenAuth("access-token", "refresh-token", nil)
 		if a == nil {
 			t.Fatal("expected auth to be created")
 		}
@@ -71,11 +71,11 @@ func TestTokenAuth(t *testing.T) {
 				t.Fatal("expected panic")
 			}
 		}()
-		auth.NewTokenAuth("", "refresh-token")
+		auth.NewTokenAuth("", "refresh-token", nil)
 	})
 
 	t.Run("returns correct headers", func(t *testing.T) {
-		a := auth.NewTokenAuth("access-token", "refresh-token")
+		a := auth.NewTokenAuth("access-token", "refresh-token", nil)
 		headers, err := a.GetHeaders()
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
@@ -88,7 +88,7 @@ func TestTokenAuth(t *testing.T) {
 	})
 
 	t.Run("does not need refresh without expiry", func(t *testing.T) {
-		a := auth.NewTokenAuth("access-token", "refresh-token")
+		a := auth.NewTokenAuth("access-token", "refresh-token", nil)
 		if a.NeedsRefresh() {
 			t.Error("expected NeedsRefresh to be false")
 		}

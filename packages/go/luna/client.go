@@ -26,15 +26,15 @@ const Version = "1.0.0"
 // Re-export commonly used types
 type (
 	// Error types
-	Error                = errors.Error
-	AuthenticationError  = errors.AuthenticationError
-	AuthorizationError   = errors.AuthorizationError
-	ValidationError      = errors.ValidationError
-	RateLimitError       = errors.RateLimitError
-	NetworkError         = errors.NetworkError
-	NotFoundError        = errors.NotFoundError
-	ConflictError        = errors.ConflictError
-	ServerError          = errors.ServerError
+	Error               = errors.Error
+	AuthenticationError = errors.AuthenticationError
+	AuthorizationError  = errors.AuthorizationError
+	ValidationError     = errors.ValidationError
+	RateLimitError      = errors.RateLimitError
+	NetworkError        = errors.NetworkError
+	NotFoundError       = errors.NotFoundError
+	ConflictError       = errors.ConflictError
+	ServerError         = errors.ServerError
 
 	// Resource types
 	User          = resources.User
@@ -59,14 +59,15 @@ type (
 
 // clientConfig holds client configuration
 type clientConfig struct {
-	apiKey       string
-	accessToken  string
-	refreshToken string
-	baseURL      string
-	timeout      int
-	maxRetries   int
-	logger       telemetry.Logger
-	logLevel     telemetry.LogLevel
+	apiKey               string
+	accessToken          string
+	refreshToken         string
+	baseURL              string
+	timeout              int
+	maxRetries           int
+	logger               telemetry.Logger
+	logLevel             telemetry.LogLevel
+	tokenRefreshCallback func(auth.TokenPair) error
 }
 
 // Client is the main Luna SDK client
@@ -106,7 +107,7 @@ func NewClient(opts ...Option) *Client {
 	if config.apiKey != "" {
 		authProvider = auth.NewAPIKeyAuth(config.apiKey)
 	} else {
-		authProvider = auth.NewTokenAuth(config.accessToken, config.refreshToken)
+		authProvider = auth.NewTokenAuth(config.accessToken, config.refreshToken, config.tokenRefreshCallback)
 	}
 
 	// Create HTTP client
@@ -157,6 +158,13 @@ func WithTokens(accessToken, refreshToken string) Option {
 	return func(c *clientConfig) {
 		c.accessToken = accessToken
 		c.refreshToken = refreshToken
+	}
+}
+
+// WithTokenRefreshCallback sets the callback for token refresh events
+func WithTokenRefreshCallback(callback func(auth.TokenPair) error) Option {
+	return func(c *clientConfig) {
+		c.tokenRefreshCallback = callback
 	}
 }
 

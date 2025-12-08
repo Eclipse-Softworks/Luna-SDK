@@ -53,43 +53,75 @@ func (e *Error) Retryable() bool {
 
 // AuthenticationError indicates authentication failure
 type AuthenticationError struct {
-	*Error
+	BaseError *Error
+}
+
+func (e *AuthenticationError) Error() string {
+	return e.BaseError.Error()
 }
 
 // AuthorizationError indicates authorization failure
 type AuthorizationError struct {
-	*Error
+	BaseError *Error
+}
+
+func (e *AuthorizationError) Error() string {
+	return e.BaseError.Error()
 }
 
 // ValidationError indicates validation failure
 type ValidationError struct {
-	*Error
+	BaseError *Error
+}
+
+func (e *ValidationError) Error() string {
+	return e.BaseError.Error()
 }
 
 // RateLimitError indicates rate limit exceeded
 type RateLimitError struct {
-	*Error
+	BaseError  *Error
 	RetryAfter int
+}
+
+func (e *RateLimitError) Error() string {
+	return e.BaseError.Error()
 }
 
 // NetworkError indicates network-related errors
 type NetworkError struct {
-	*Error
+	BaseError *Error
+}
+
+func (e *NetworkError) Error() string {
+	return e.BaseError.Error()
 }
 
 // NotFoundError indicates resource not found
 type NotFoundError struct {
-	*Error
+	BaseError *Error
+}
+
+func (e *NotFoundError) Error() string {
+	return e.BaseError.Error()
 }
 
 // ConflictError indicates resource conflict
 type ConflictError struct {
-	*Error
+	BaseError *Error
+}
+
+func (e *ConflictError) Error() string {
+	return e.BaseError.Error()
 }
 
 // ServerError indicates server-side errors
 type ServerError struct {
-	*Error
+	BaseError *Error
+}
+
+func (e *ServerError) Error() string {
+	return e.BaseError.Error()
 }
 
 // New creates a new Error with the given parameters
@@ -115,20 +147,20 @@ func FromResponse(status int, code, message, requestID string, details map[strin
 
 	switch status {
 	case 400:
-		return &ValidationError{Error: base}
+		return &ValidationError{BaseError: base}
 	case 401:
-		return &AuthenticationError{Error: base}
+		return &AuthenticationError{BaseError: base}
 	case 403:
-		return &AuthorizationError{Error: base}
+		return &AuthorizationError{BaseError: base}
 	case 404:
-		return &NotFoundError{Error: base}
+		return &NotFoundError{BaseError: base}
 	case 409:
-		return &ConflictError{Error: base}
+		return &ConflictError{BaseError: base}
 	case 429:
-		return &RateLimitError{Error: base, RetryAfter: retryAfter}
+		return &RateLimitError{BaseError: base, RetryAfter: retryAfter}
 	default:
 		if status >= 500 {
-			return &ServerError{Error: base}
+			return &ServerError{BaseError: base}
 		}
 		return base
 	}

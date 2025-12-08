@@ -65,7 +65,6 @@ class HttpClient:
                     {
                         "request_id": request_id,
                         "method": config.method,
-                        "path": config.path,
                         "status": response.status,
                     },
                 )
@@ -107,10 +106,6 @@ class HttpClient:
                 retry_after = getattr(error, "retry_after", None)
                 await self._wait_for_retry(attempt, retry_after)
                 attempt += 1
-
-        # Should never reach here, but satisfy type checker
-        assert last_error is not None
-        raise last_error
 
     async def _execute_request(
         self, url: str, config: RequestConfig, request_id: str
