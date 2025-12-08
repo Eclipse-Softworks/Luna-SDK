@@ -2,6 +2,7 @@ import { HttpClient } from './http/client.js';
 import { ApiKeyAuth, TokenAuth, type AuthProvider } from './auth/index.js';
 import { UsersResource } from './resources/users.js';
 import { ProjectsResource } from './resources/projects.js';
+import { ResMateResource } from './resources/resmate.js';
 import { ConsoleLogger, type Logger, type LogLevel, type TelemetryConfig } from './telemetry/index.js';
 
 /**
@@ -81,6 +82,9 @@ export class LunaClient {
     /** Projects resource */
     public readonly projects: ProjectsResource;
 
+    /** ResMate resource */
+    public readonly resMate: ResMateResource;
+
     constructor(config: ClientConfig) {
         // Validate config
         if (!config.apiKey && !config.accessToken) {
@@ -114,6 +118,7 @@ export class LunaClient {
         // Initialize resources
         this.users = new UsersResource(this.httpClient);
         this.projects = new ProjectsResource(this.httpClient);
+        this.resMate = new ResMateResource(this.httpClient);
 
         this.logger.debug('LunaClient initialized', {
             baseUrl: config.baseUrl ?? DEFAULT_BASE_URL,

@@ -83,3 +83,73 @@ export interface ProjectUpdate {
  * Paginated list of projects
  */
 export type ProjectList = ListResponse<Project>;
+
+/**
+ * Residence resource
+ */
+export interface Residence {
+    id: string;
+    name: string;
+    slug: string;
+    address: string;
+    description?: string;
+
+    // Filters & Attributes
+    is_nsfas_accredited: boolean;
+    min_price: number;
+    max_price: number;
+    currency_code: string;
+    gender_policy: 'mixed' | 'male' | 'female';
+
+    // Location & Relations
+    location: {
+        latitude: number;
+        longitude: number;
+        suburb?: string;
+        city?: string;
+    };
+    campus_ids: string[];
+
+    // Social
+    rating: number;
+    review_count: number;
+
+    images: string[];
+    amenities: string[];
+}
+
+/**
+ * Search/Filter parameters for residences
+ */
+export interface ResidenceSearch extends PaginationParams {
+    query?: string;
+    nsfas?: boolean;
+    min_price?: number;
+    max_price?: number;
+    gender?: 'male' | 'female' | 'mixed';
+    campus_id?: string;
+    radius?: number;
+    min_rating?: number;
+}
+
+/**
+ * Campus resource
+ */
+export interface Campus {
+    id: string;
+    name: string;
+    location: {
+        latitude: number;
+        longitude: number;
+    };
+}
+
+/**
+ * Paginated list of residences
+ */
+export type ResidenceList = ListResponse<Residence>;
+
+/**
+ * List of campuses
+ */
+export type CampusList = ListResponse<Campus>;
