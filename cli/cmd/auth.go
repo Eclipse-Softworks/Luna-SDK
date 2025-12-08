@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+
 	"os/exec"
 	"runtime"
 

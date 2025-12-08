@@ -7,7 +7,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 var projectsCmd = &cobra.Command{
@@ -23,6 +23,8 @@ var projectsListCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		limit, _ := cmd.Flags().GetInt("limit")
 		cursor, _ := cmd.Flags().GetString("cursor")
+		_ = limit
+		_ = cursor
 
 		apiKey := getAPIKey()
 		if apiKey == "" {
