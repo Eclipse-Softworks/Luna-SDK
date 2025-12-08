@@ -1,4 +1,5 @@
 import type { HttpClient } from '../http/client.js';
+import { Paginator } from './pagination.js';
 import type {
     User,
     UserCreate,
@@ -9,27 +10,6 @@ import type {
 
 /**
  * Users resource for managing user accounts
- *
- * @example
- * ```typescript
- * // List users
- * const users = await client.users.list({ limit: 10 });
- *
- * // Get a user
- * const user = await client.users.get('usr_123');
- *
- * // Create a user
- * const newUser = await client.users.create({
- *   email: 'john@example.com',
- *   name: 'John Doe',
- * });
- *
- * // Update a user
- * const updated = await client.users.update('usr_123', { name: 'Jane Doe' });
- *
- * // Delete a user
- * await client.users.delete('usr_123');
- * ```
  */
 export class UsersResource {
     private readonly httpClient: HttpClient;
@@ -53,6 +33,18 @@ export class UsersResource {
         });
 
         return response.data;
+    }
+
+    /**
+     * Iterate over all users automatically handling pagination
+     */
+    iterate(params?: PaginationParams): Paginator<User> {
+        return new Paginator<User>(
+            async (cursor) => {
+                const page = await this.list({ ...params, cursor });
+                return page;
+            }
+        );
     }
 
     /**

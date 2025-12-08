@@ -6,6 +6,7 @@ import re
 from typing import TYPE_CHECKING
 
 from luna.types import User, UserCreate, UserUpdate, UserList, PaginationParams
+from luna.resources.pagination import Paginator
 
 if TYPE_CHECKING:
     from luna.http import HttpClient
@@ -59,6 +60,15 @@ class UsersResource:
             )
         )
         return UserList.model_validate(response.data)
+
+    def iterate(self, limit: int | None = None) -> Paginator[User]:
+        """Iterate over all users automatically handling pagination."""
+        from luna.resources.pagination import Paginator
+        
+        async def fetch_next(cursor: str | None) -> UserList:
+            return await self.list(limit=limit, cursor=cursor)
+            
+        return Paginator(fetch_next)
 
     async def get(self, user_id: str) -> User:
         """Get a user by ID."""

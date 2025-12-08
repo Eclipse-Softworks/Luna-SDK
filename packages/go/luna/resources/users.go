@@ -28,7 +28,7 @@ func NewUsersResource(client *lunahttp.Client) *UsersResource {
 }
 
 // List retrieves all users with pagination
-func (r *UsersResource) List(ctx context.Context, params *ListParams) (*UserList, error) {
+func (r *UsersResource) List(ctx context.Context, params *ListParams) (*ListResponse[User], error) {
 	query := url.Values{}
 	if params != nil {
 		if params.Limit > 0 {
@@ -54,6 +54,18 @@ func (r *UsersResource) List(ctx context.Context, params *ListParams) (*UserList
 	}
 
 	return &result, nil
+}
+
+// Iterate returns a paginator for iterating over users
+func (r *UsersResource) Iterate(ctx context.Context, params *ListParams) *Paginator[User] {
+	return NewPaginator(ctx, func(ctx context.Context, cursor string) (*ListResponse[User], error) {
+		p := params
+		if p == nil {
+			p = &ListParams{}
+		}
+		p.Cursor = cursor
+		return r.List(ctx, p)
+	})
 }
 
 // Get retrieves a user by ID

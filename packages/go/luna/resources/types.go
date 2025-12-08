@@ -33,11 +33,7 @@ type UserUpdate struct {
 }
 
 // UserList holds a paginated list of users
-type UserList struct {
-	Data       []User  `json:"data"`
-	HasMore    bool    `json:"has_more"`
-	NextCursor *string `json:"next_cursor,omitempty"`
-}
+type UserList = ListResponse[User]
 
 // Project represents a project resource
 type Project struct {
@@ -62,8 +58,4 @@ type ProjectUpdate struct {
 }
 
 // ProjectList holds a paginated list of projects
-type ProjectList struct {
-	Data       []Project `json:"data"`
-	HasMore    bool      `json:"has_more"`
-	NextCursor *string   `json:"next_cursor,omitempty"`
-}
+type ProjectList = ListResponse[Project]
