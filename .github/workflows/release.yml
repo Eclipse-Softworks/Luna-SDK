@@ -126,7 +126,7 @@ jobs:
       - name: Create .npmrc
         working-directory: packages/typescript
         run: |
-          echo "@moon9t:registry=https://registry.npmjs.org/" > .npmrc
+          echo "@eclipse-softworks:registry=https://registry.npmjs.org/" > .npmrc
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
       
       - name: Publish to npm
