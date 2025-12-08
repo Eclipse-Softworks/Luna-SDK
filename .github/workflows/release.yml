@@ -112,6 +112,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
+          scope: '@moon9t'
       
       - name: Download TypeScript dist
         uses: actions/download-artifact@v6
@@ -122,9 +123,6 @@ jobs:
       - name: Install dependencies
         working-directory: packages/typescript
         run: npm ci
-      
-      - name: Set up npm authentication
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
       
       - name: Publish to npm
         working-directory: packages/typescript
