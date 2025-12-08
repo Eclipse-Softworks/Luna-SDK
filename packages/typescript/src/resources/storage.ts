@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http/client.js';
-import type { Bucket, BucketList, FileObject } from '../types/index.js';
+import type { Bucket, BucketList, FileObject, ListResponse } from '../types/index.js';
 
 export class BucketsResource {
     private readonly httpClient: HttpClient;

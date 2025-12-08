@@ -1,5 +1,5 @@
 import type { HttpClient } from '../http/client.js';
-import type { Group, GroupList, GroupCreate, ListResponse } from '../types/index.js';
+import type { Group, GroupList, GroupCreate } from '../types/index.js';
 
 export class GroupsResource {
     private readonly httpClient: HttpClient;
