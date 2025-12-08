@@ -111,7 +111,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
       
       - name: Download TypeScript dist
         uses: actions/download-artifact@v6
@@ -123,6 +122,12 @@ jobs:
         working-directory: packages/typescript
         run: npm ci
       
+      - name: Configure npm authentication
+        run: |
+          cat > $HOME/.npmrc << EOF
+          //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+          EOF
+      
       - name: Publish to npm
         working-directory: packages/typescript
         run: |
@@ -131,8 +136,6 @@ jobs:
           else
             npm publish --access public
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   # ==================== PUBLISH PYPI ====================
   publish-pypi:
