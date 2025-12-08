@@ -24,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment variable configuration loading
 - Structured JSON logging with sensitive data redaction
 
+#### Service Modules
+- **ResMate**: Student Residences management (listings, search, filtering)
+- **Identity**: Group management and access control
+- **Storage**: Buckets and file management (upload/download URLs)
+- **AI Tools**: Chat completions integration
+- **Automation**: Workflow management and execution triggers
+
 #### TypeScript SDK
 - ESM/CJS dual output with full TypeScript types
 - Vitest test suite with coverage thresholds

@@ -60,9 +60,12 @@ users, err := client.Users().List(ctx)
 
 ## Documentation
 
-- [API Reference](./docs/api-reference/)
-- [Guides](./docs/guides/)
-- [Architecture](./docs/architecture/)
+- [Getting Started](./docs/README.md)
+- [Installation](./docs/installation.md)
+- [Authentication](./docs/authentication.md)
+- [Service Modules](./docs/services.md)
+- [Error Reference](./docs/errors.md)
+- [Versioning](./docs/versioning.md)
 
 ## CLI
 

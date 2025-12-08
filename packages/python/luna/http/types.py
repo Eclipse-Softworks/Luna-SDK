@@ -15,6 +15,8 @@ class RequestConfig:
     headers: dict[str, str] | None = None
     query: dict[str, str | list[str] | None] | None = None
     body: Any | None = None
+    files: dict[str, Any] | None = None
+    content_type: str | None = None
     timeout: float | None = None
 
 

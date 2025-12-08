@@ -4,6 +4,7 @@ import pytest
 from datetime import datetime, timedelta
 
 from luna.auth import ApiKeyAuth, TokenAuth
+from luna.errors import AuthenticationError
 
 
 class TestApiKeyAuth:
@@ -18,18 +19,18 @@ class TestApiKeyAuth:
 
     def test_error_on_empty_key(self) -> None:
         """Should raise error for empty API key."""
-        with pytest.raises(ValueError, match="API key is required"):
+        with pytest.raises(AuthenticationError, match="API key is required"):
             ApiKeyAuth("")
 
     def test_error_on_invalid_format(self) -> None:
         """Should raise error for invalid API key format."""
-        with pytest.raises(ValueError, match="Invalid API key format"):
+        with pytest.raises(AuthenticationError, match="Invalid API key format"):
             ApiKeyAuth("invalid-key")
 
-        with pytest.raises(ValueError, match="Invalid API key format"):
+        with pytest.raises(AuthenticationError, match="Invalid API key format"):
             ApiKeyAuth("lk_invalid_key")
 
-        with pytest.raises(ValueError, match="Invalid API key format"):
+        with pytest.raises(AuthenticationError, match="Invalid API key format"):
             ApiKeyAuth("lk_test_short")
 
     @pytest.mark.asyncio
@@ -59,7 +60,7 @@ class TestTokenAuth:
 
     def test_error_on_empty_token(self) -> None:
         """Should raise error for empty access token."""
-        with pytest.raises(ValueError, match="Access token is required"):
+        with pytest.raises(AuthenticationError, match="Access token is required"):
             TokenAuth(access_token="")
 
     @pytest.mark.asyncio

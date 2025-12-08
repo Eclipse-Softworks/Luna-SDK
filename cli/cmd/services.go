@@ -5,6 +5,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/eclipse-softworks/luna-sdk-go/luna"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +26,7 @@ var servicesListCmd = &cobra.Command{
 		services := []struct {
 			Name, Desc, Status string
 		}{
-			{"Identity", "User and group management", "Active"},
+			{"Identity", "User and group management", "Active (SDK v" + luna.Version + ")"},
 			{"ResMate", "Student residence listings", "Active"},
 			{"Storage", "Cloud object storage", "Active"},
 			{"AI Objects", "Generative AI completions", "Beta"},

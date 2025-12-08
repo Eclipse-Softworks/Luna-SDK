@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os/exec"
 	"runtime"
 
@@ -35,6 +36,25 @@ var doctorCmd = &cobra.Command{
 			fmt.Printf("  ✓ API Key found (%s...)\n", apiKey[:5])
 		} else {
 			fmt.Println("  ✗ No API Key found (Run 'luna auth login')")
+		}
+
+		// Connectivity Check
+		fmt.Printf("\nConnectivity:\n")
+		// Using a public endpoint or the base URL from constants if possible.
+		// We'll hardcode the known production generic endpoint for health check.
+		resp, err := http.Get("https://api.eclipse.dev/health")
+		if err == nil && resp.StatusCode == 200 {
+			fmt.Println("  ✓ API Gateway (api.eclipse.dev): Reachable")
+		} else {
+			fmt.Println("  ✗ API Gateway (api.eclipse.dev): Unreachable or Down")
+		}
+
+		// check Auth server
+		resp, err = http.Get("https://auth.eclipse.dev/.well-known/openid-configuration")
+		if err == nil && resp.StatusCode == 200 {
+			fmt.Println("  ✓ Auth Service (auth.eclipse.dev): Reachable")
+		} else {
+			fmt.Println("  ✗ Auth Service (auth.eclipse.dev): Unreachable")
 		}
 
 		fmt.Println("\nDiagnostics complete.")

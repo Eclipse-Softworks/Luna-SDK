@@ -13,6 +13,8 @@
 package luna
 
 import (
+	"fmt"
+
 	"github.com/eclipse-softworks/luna-sdk-go/luna/auth"
 	"github.com/eclipse-softworks/luna-sdk-go/luna/errors"
 	lunahttp "github.com/eclipse-softworks/luna-sdk-go/luna/http"
@@ -85,6 +87,7 @@ type clientConfig struct {
 	logger               telemetry.Logger
 	logLevel             telemetry.LogLevel
 	tokenRefreshCallback func(auth.TokenPair) error
+	httpClient           *lunahttp.Client
 }
 
 // Client is the main Luna SDK client
@@ -101,7 +104,7 @@ type Client struct {
 }
 
 // NewClient creates a new Luna SDK client
-func NewClient(opts ...Option) *Client {
+func NewClient(opts ...Option) (*Client, error) {
 	config := &clientConfig{
 		baseURL:    "https://api.eclipse.dev",
 		timeout:    30000,
@@ -114,8 +117,13 @@ func NewClient(opts ...Option) *Client {
 	}
 
 	// Validate config
+	if config.baseURL == "" {
+		return nil, fmt.Errorf("luna: base URL cannot be empty")
+	}
+
+	// Validate auth
 	if config.apiKey == "" && config.accessToken == "" {
-		panic("luna: either apiKey or accessToken must be provided")
+		return nil, fmt.Errorf("luna: either apiKey or accessToken must be provided")
 	}
 
 	// Set up logger
@@ -127,19 +135,33 @@ func NewClient(opts ...Option) *Client {
 	// Set up auth provider
 	var authProvider auth.Provider
 	if config.apiKey != "" {
-		authProvider = auth.NewAPIKeyAuth(config.apiKey)
+		var err error
+		authProvider, err = auth.NewAPIKeyAuth(config.apiKey)
+		if err != nil {
+			return nil, err
+		}
 	} else {
-		authProvider = auth.NewTokenAuth(config.accessToken, config.refreshToken, config.tokenRefreshCallback)
+		var err error
+		authProvider, err = auth.NewTokenAuth(config.accessToken, config.refreshToken, config.tokenRefreshCallback)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Create HTTP client
-	httpClient := lunahttp.NewClient(lunahttp.ClientConfig{
-		BaseURL:      config.baseURL,
-		Timeout:      config.timeout,
-		MaxRetries:   config.maxRetries,
-		AuthProvider: authProvider,
-		Logger:       logger,
-	})
+	var httpClient *lunahttp.Client
+	if config.httpClient != nil {
+		httpClient = config.httpClient
+	} else {
+		// Allow for custom HTTP client if we add that option later, but for now use standard
+		httpClient = lunahttp.NewClient(lunahttp.ClientConfig{
+			BaseURL:      config.baseURL,
+			Timeout:      config.timeout,
+			MaxRetries:   config.maxRetries,
+			AuthProvider: authProvider,
+			Logger:       logger,
+		})
+	}
 
 	client := &Client{
 		config:     config,
@@ -160,7 +182,7 @@ func NewClient(opts ...Option) *Client {
 		"auth_type": getAuthType(config),
 	})
 
-	return client
+	return client, nil
 }
 
 // Users returns the Users resource
@@ -248,10 +270,10 @@ func WithLogger(logger telemetry.Logger) Option {
 	}
 }
 
-// WithLogLevel sets the log level
-func WithLogLevel(level telemetry.LogLevel) Option {
+// WithHTTPClient allows providing a custom HTTP client
+func WithHTTPClient(client *lunahttp.Client) Option {
 	return func(c *clientConfig) {
-		c.logLevel = level
+		c.httpClient = client
 	}
 }
 

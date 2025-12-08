@@ -15,6 +15,12 @@ class TokenAuth(AuthProvider):
         expires_at: datetime | None = None,
         on_refresh: Callable[[TokenPair], Awaitable[None]] | None = None,
     ) -> None:
+        if not access_token:
+            raise AuthenticationError(
+                code=ErrorCode.AUTH_INVALID_KEY,
+                message="Access token is required",
+                request_id="local",
+            )
         self._access_token = access_token
         self._refresh_token = refresh_token
         self._expires_at = expires_at
@@ -63,3 +69,9 @@ class TokenAuth(AuthProvider):
                     refresh_token=self._refresh_token,
                     expires_at=self._expires_at
                 ))
+
+    def update_tokens(self, tokens: TokenPair) -> None:
+        """Update tokens manually."""
+        self._access_token = tokens.access_token
+        self._refresh_token = tokens.refresh_token
+        self._expires_at = tokens.expires_at

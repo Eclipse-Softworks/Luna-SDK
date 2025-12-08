@@ -1,0 +1,23 @@
+# Codeowners for Luna SDK
+# These users/teams will be automatically requested for review
+
+# Global owners
+* @eclipse-softworks/sdk-team
+
+# TypeScript SDK
+/packages/typescript/ @eclipse-softworks/typescript-team
+
+# Python SDK
+/packages/python/ @eclipse-softworks/python-team
+
+# Go SDK
+/packages/go/ @eclipse-softworks/go-team
+
+# CLI
+/cli/ @eclipse-softworks/cli-team
+
+# Documentation
+/docs/ @eclipse-softworks/docs-team
+
+# CI/CD
+/.github/ @eclipse-softworks/devops-team

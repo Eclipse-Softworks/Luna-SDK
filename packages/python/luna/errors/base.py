@@ -14,8 +14,8 @@ class LunaError(Exception):
 
     code: str
     message: str
-    status: int
     request_id: str
+    status: int
     details: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:

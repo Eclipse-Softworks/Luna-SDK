@@ -23,11 +23,14 @@ type TokenAuth struct {
 	mu        sync.RWMutex
 }
 
-func NewTokenAuth(access, refresh string, onRefresh func(TokenPair) error) *TokenAuth {
+func NewTokenAuth(access, refresh string, onRefresh func(TokenPair) error) (*TokenAuth, error) {
+	if access == "" {
+		return nil, fmt.Errorf("auth: access token is required")
+	}
 	return &TokenAuth{
 		tokens:    TokenPair{AccessToken: access, RefreshToken: refresh},
 		onRefresh: onRefresh,
-	}
+	}, nil
 }
 
 func (t *TokenAuth) GetHeaders() (map[string]string, error) {

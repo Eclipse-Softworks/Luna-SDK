@@ -170,7 +170,10 @@ func main() {
 		log.Fatal("LUNA_API_KEY not set")
 	}
 
-	client := luna.NewClient(luna.WithAPIKey(apiKey))
+	client, err := luna.NewClient(luna.WithAPIKey(apiKey))
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
 
 	users, err := client.Users().List(context.Background(), &luna.ListParams{Limit: 5})
 	if err != nil {

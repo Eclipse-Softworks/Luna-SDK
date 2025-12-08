@@ -15,6 +15,7 @@ from luna.errors import LunaError, NetworkError, create_error
 from luna.errors.codes import ErrorCode
 from luna.http.types import RequestConfig, Response, RetryConfig
 from luna.telemetry import Logger
+from luna.utils.system import get_system_info
 
 T = TypeVar("T")
 
@@ -36,6 +37,20 @@ class HttpClient:
         self._logger = logger
         self._retry_config = RetryConfig(max_retries=max_retries)
         self._client: httpx.AsyncClient | None = None
+
+    async def __aenter__(self) -> "HttpClient":
+        """Enter async context."""
+        await self._get_client()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any | None,
+    ) -> None:
+        """Exit async context."""
+        await self.close()
 
     async def _get_client(self) -> httpx.AsyncClient:
         """Get or create HTTP client."""
@@ -118,7 +133,7 @@ class HttpClient:
             "Content-Type": "application/json",
             "Accept": "application/json",
             "X-Request-Id": request_id,
-            "User-Agent": "luna-sdk-python/1.0.0",
+            "User-Agent": self._get_user_agent(),
             **auth_headers,
             **(config.headers or {}),
         }
@@ -128,14 +143,29 @@ class HttpClient:
             {"request_id": request_id, "method": config.method, "url": url},
         )
 
+        if config.content_type:
+             headers["Content-Type"] = config.content_type
+        elif config.files:
+             # Let httpx handle boundary
+             headers.pop("Content-Type", None)
+
+        kwargs: dict[str, Any] = {
+            "method": config.method,
+            "url": url,
+            "headers": headers,
+            "timeout": config.timeout or self._timeout,
+        }
+
+        if config.files:
+            kwargs["files"] = config.files
+            if config.body:
+                kwargs["data"] = config.body
+        elif config.body is not None:
+             # Standard JSON request
+             kwargs["json"] = config.body
+
         try:
-            response = await client.request(
-                method=config.method,
-                url=url,
-                headers=headers,
-                json=config.body if config.body else None,
-                timeout=config.timeout or self._timeout,
-            )
+            response = await client.request(**kwargs)
 
         except httpx.TimeoutException:
             raise NetworkError(
@@ -170,9 +200,13 @@ class HttpClient:
                 except ValueError:
                     pass
 
+            err_body = body or {}
+            if "error" in err_body and isinstance(err_body["error"], dict):
+                err_body = err_body["error"]
+
             raise create_error(
                 status=response.status_code,
-                body=body or {},
+                body=err_body,
                 request_id=server_request_id,
                 retry_after=retry_after,
             )
@@ -207,6 +241,11 @@ class HttpClient:
                 url = f"{url}?{urlencode(params)}"
 
         return url
+
+    def _get_user_agent(self) -> str:
+        """Get the User-Agent string."""
+        info = get_system_info()
+        return f"luna-sdk-python/1.0.0 ({info['os']}; {info['arch']}) {info['runtime']}/{info['runtime_version']}"
 
     def _generate_request_id(self) -> str:
         """Generate unique request ID."""

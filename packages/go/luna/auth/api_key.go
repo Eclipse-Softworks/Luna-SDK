@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"regexp"
 )
 
@@ -12,20 +13,20 @@ type APIKeyAuth struct {
 var apiKeyPattern = regexp.MustCompile(`^lk_(live|test|dev)_[a-zA-Z0-9]{32}$`)
 
 // NewAPIKeyAuth creates a new API key authentication provider
-func NewAPIKeyAuth(apiKey string) *APIKeyAuth {
+func NewAPIKeyAuth(apiKey string) (*APIKeyAuth, error) {
 	if apiKey == "" {
-		panic("auth: API key is required")
+		return nil, fmt.Errorf("auth: API key is required")
 	}
 	if !apiKeyPattern.MatchString(apiKey) {
-		panic("auth: invalid API key format, expected: lk_<env>_<key>")
+		return nil, fmt.Errorf("auth: invalid API key format, expected: lk_<env>_<key>")
 	}
-	return &APIKeyAuth{apiKey: apiKey}
+	return &APIKeyAuth{apiKey: apiKey}, nil
 }
 
 // GetHeaders returns authorization headers with the API key
 func (a *APIKeyAuth) GetHeaders() (map[string]string, error) {
 	return map[string]string{
-		"X-Luna-Api-Key": a.apiKey,
+		"Authorization": "Bearer " + a.apiKey,
 	}, nil
 }
 

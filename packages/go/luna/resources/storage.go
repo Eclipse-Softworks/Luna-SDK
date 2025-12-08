@@ -1,9 +1,12 @@
 package resources
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 
 	lunahttp "github.com/eclipse-softworks/luna-sdk-go/luna/http"
 )
@@ -33,12 +36,35 @@ func (r *BucketsResource) List(ctx context.Context) (*BucketList, error) {
 }
 
 // Upload uploads a file to a bucket
-// Note: This is a placeholder for the binary upload.
-func (r *BucketsResource) Upload(ctx context.Context, bucketID string, body interface{}) (*FileObject, error) {
+func (r *BucketsResource) Upload(ctx context.Context, bucketID string, file io.Reader, filename string, metadata map[string]string) (*FileObject, error) {
+	// Create multipart body
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	// Add file
+	part, err := writer.CreateFormFile("file", filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create form file: %w", err)
+	}
+	if _, err := io.Copy(part, file); err != nil {
+		return nil, fmt.Errorf("failed to copy file content: %w", err)
+	}
+
+	// Add metadata
+	if len(metadata) > 0 {
+		metaBytes, _ := json.Marshal(metadata)
+		_ = writer.WriteField("metadata", string(metaBytes))
+	}
+
+	if err := writer.Close(); err != nil {
+		return nil, fmt.Errorf("failed to close multipart writer: %w", err)
+	}
+
 	resp, err := r.client.Request(ctx, lunahttp.RequestConfig{
-		Method: "POST",
-		Path:   fmt.Sprintf("%s/%s/upload", r.basePath, bucketID),
-		Body:   body,
+		Method:      "POST",
+		Path:        fmt.Sprintf("%s/%s/upload", r.basePath, bucketID),
+		BodyReader:  body,
+		ContentType: writer.FormDataContentType(),
 	})
 	if err != nil {
 		return nil, err

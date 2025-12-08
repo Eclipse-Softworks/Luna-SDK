@@ -7,6 +7,11 @@ from typing import Callable, Awaitable
 from luna.auth import ApiKeyAuth, TokenAuth, AuthProvider
 from luna.http import HttpClient
 from luna.resources import UsersResource, ProjectsResource
+from luna.resources.resmate import ResMateResource
+from luna.resources.identity import IdentityResource
+from luna.resources.storage import StorageResource
+from luna.resources.ai import AiResource
+from luna.resources.automation import AutomationResource
 from luna.telemetry import Logger, ConsoleLogger, LogLevel
 
 
@@ -112,6 +117,11 @@ class LunaClient:
         # Initialize resources
         self.users = UsersResource(self._http_client)
         self.projects = ProjectsResource(self._http_client)
+        self.res_mate = ResMateResource(self._http_client)
+        self.identity = IdentityResource(self._http_client)
+        self.storage = StorageResource(self._http_client)
+        self.ai = AiResource(self._http_client)
+        self.automation = AutomationResource(self._http_client)
 
         self._logger.debug(
             "LunaClient initialized",

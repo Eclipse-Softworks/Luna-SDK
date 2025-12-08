@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"os/exec"
@@ -30,7 +32,7 @@ var loginCmd = &cobra.Command{
 		errChan := make(chan error)
 
 		// 2. Start local server
-		server := &http.Server{Addr: ":9999"}
+		server := &http.Server{Addr: "127.0.0.1:9999"}
 		http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
 			code := r.URL.Query().Get("code")
 			if code == "" {
@@ -174,7 +176,10 @@ var verifyCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated")
 		}
 
-		client := luna.NewClient(luna.WithAPIKey(apiKey))
+		client, err := luna.NewClient(luna.WithAPIKey(apiKey))
+		if err != nil {
+			return fmt.Errorf("failed to create client: %w", err)
+		}
 
 		// Attempt to fetch something simpler or just use existing resources to verify auth
 		// Since there isn't an explicit "Verify" or "Me" endpoint exposed in the top level resources we see,
@@ -184,7 +189,7 @@ var verifyCmd = &cobra.Command{
 		// A common pattern is to check "Me" but we don't have that resource visible in client.go right now.
 		// We'll use List Users as a proxy for "Is Authenticated".
 
-		_, err := client.Users().List(cmd.Context(), &luna.ListParams{Limit: 1})
+		_, err = client.Users().List(cmd.Context(), &luna.ListParams{Limit: 1})
 		if err != nil {
 			return fmt.Errorf("verification failed: %w", err)
 		}
@@ -230,12 +235,24 @@ type TokenResponse struct {
 
 func exchangeToken(code string) (*TokenResponse, error) {
 	// Real HTTP request to exchange code
-	resp, err := http.PostForm("https://auth.eclipse.dev/oauth/token", map[string][]string{
-		"grant_type":   {"authorization_code"},
-		"client_id":    {"luna-cli"},
-		"code":         {code},
-		"redirect_uri": {"http://localhost:9999/callback"},
-	})
+	// Use custom client with timeout
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	data := url.Values{}
+	data.Set("grant_type", "authorization_code")
+	data.Set("client_id", "luna-cli")
+	data.Set("code", code)
+	data.Set("redirect_uri", "http://localhost:9999/callback")
+
+	req, err := http.NewRequest("POST", "https://auth.eclipse.dev/oauth/token", strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}

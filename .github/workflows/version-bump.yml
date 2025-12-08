@@ -1,0 +1,213 @@
+# Version Bump Workflow
+# Creates a PR with version bumps and changelog updates
+# Triggered manually or on release schedule
+
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+      prerelease_tag:
+        description: 'Prerelease tag (alpha, beta, rc)'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  bump-version:
+    name: Bump Version
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.bump.outputs.new_version }}
+      pr_number: ${{ steps.create-pr.outputs.pull-request-number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Get current version
+        id: current
+        run: |
+          # Read from TypeScript package.json as source of truth
+          CURRENT=$(node -p "require('./packages/typescript/package.json').version")
+          echo "version=$CURRENT" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT"
+      
+      - name: Calculate new version
+        id: bump
+        run: |
+          CURRENT="${{ steps.current.outputs.version }}"
+          BUMP_TYPE="${{ inputs.bump_type }}"
+          PRERELEASE_TAG="${{ inputs.prerelease_tag }}"
+          
+          # Parse semver
+          IFS='.-' read -r MAJOR MINOR PATCH PRE <<< "$CURRENT"
+          
+          case "$BUMP_TYPE" in
+            major)
+              NEW_VERSION="$((MAJOR + 1)).0.0"
+              ;;
+            minor)
+              NEW_VERSION="${MAJOR}.$((MINOR + 1)).0"
+              ;;
+            patch)
+              NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+              ;;
+            prerelease)
+              if [ -n "$PRERELEASE_TAG" ]; then
+                NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-${PRERELEASE_TAG}.1"
+              else
+                NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))-alpha.1"
+              fi
+              ;;
+          esac
+          
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+      
+      - name: Update TypeScript version
+        working-directory: packages/typescript
+        run: |
+          npm version ${{ steps.bump.outputs.new_version }} --no-git-tag-version
+      
+      - name: Update Python version
+        working-directory: packages/python
+        run: |
+          sed -i 's/version = ".*"/version = "${{ steps.bump.outputs.new_version }}"/' pyproject.toml
+      
+      - name: Update Go version
+        working-directory: packages/go/luna
+        run: |
+          # Update version constant if exists
+          if [ -f client.go ]; then
+            sed -i 's/const Version = ".*"/const Version = "${{ steps.bump.outputs.new_version }}"/' client.go
+          fi
+      
+      - name: Update CLI version
+        working-directory: cli
+        run: |
+          if [ -f cmd/root.go ]; then
+            sed -i 's/const Version = ".*"/const Version = "${{ steps.bump.outputs.new_version }}"/' cmd/root.go
+          fi
+      
+      - name: Generate changelog entry
+        id: changelog
+        run: |
+          VERSION="${{ steps.bump.outputs.new_version }}"
+          DATE=$(date +%Y-%m-%d)
+          
+          # Get commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -n "$LAST_TAG" ]; then
+            COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"- %s" --no-merges | head -20)
+          else
+            COMMITS=$(git log --pretty=format:"- %s" --no-merges -20)
+          fi
+          
+          # Create new changelog entry
+          echo "## [$VERSION] - $DATE" > entry.md
+          echo "" >> entry.md
+          echo "### Added" >> entry.md
+          echo "- New features in this release" >> entry.md
+          echo "" >> entry.md
+          echo "### Changed" >> entry.md
+          echo "- Changes to existing functionality" >> entry.md
+          echo "" >> entry.md
+          echo "### Fixed" >> entry.md
+          echo "- Bug fixes" >> entry.md
+          echo "" >> entry.md
+          echo "### Commits" >> entry.md
+          echo "$COMMITS" >> entry.md
+          
+          # Prepend to CHANGELOG.md
+          if [ -f CHANGELOG.md ]; then
+            # Insert after the first line (title)
+            head -1 CHANGELOG.md > CHANGELOG.tmp
+            echo "" >> CHANGELOG.tmp
+            cat entry.md >> CHANGELOG.tmp
+            tail -n +2 CHANGELOG.md >> CHANGELOG.tmp
+            mv CHANGELOG.tmp CHANGELOG.md
+          else
+            echo "# Changelog" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            cat entry.md >> CHANGELOG.md
+          fi
+          rm entry.md
+      
+      - name: Create Pull Request
+        id: create-pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: bump version to ${{ steps.bump.outputs.new_version }}"
+          title: "chore: Release v${{ steps.bump.outputs.new_version }}"
+          body: |
+            ## Version Bump to v${{ steps.bump.outputs.new_version }}
+            
+            This PR was automatically generated by the version bump workflow.
+            
+            ### Changes
+            - Updated TypeScript package version
+            - Updated Python package version
+            - Updated Go SDK version constant
+            - Updated CLI version
+            - Generated changelog entry
+            
+            ### Checklist
+            - [ ] Review changelog and update as needed
+            - [ ] Ensure all tests pass
+            - [ ] Merge and tag for release
+            
+            **To release after merging:**
+            ```bash
+            git tag v${{ steps.bump.outputs.new_version }}
+            git push origin v${{ steps.bump.outputs.new_version }}
+            ```
+          branch: release/v${{ steps.bump.outputs.new_version }}
+          base: main
+          labels: |
+            release
+            automated
+      
+      - name: Summary
+        run: |
+          echo "## Version Bump Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Previous Version:** ${{ steps.current.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New Version:** ${{ steps.bump.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bump Type:** ${{ inputs.bump_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR:** #${{ steps.create-pr.outputs.pull-request-number }}" >> $GITHUB_STEP_SUMMARY

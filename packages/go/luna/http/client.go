@@ -47,11 +47,13 @@ func NewClient(config ClientConfig) *Client {
 
 // RequestConfig holds request configuration
 type RequestConfig struct {
-	Method  string
-	Path    string
-	Query   url.Values
-	Body    interface{}
-	Timeout time.Duration
+	Method      string
+	Path        string
+	Query       url.Values
+	Body        interface{}
+	BodyReader  io.Reader
+	ContentType string
+	Timeout     time.Duration
 }
 
 // Response holds response data
@@ -122,7 +124,15 @@ func (c *Client) executeRequest(ctx context.Context, reqURL string, config Reque
 	}
 
 	var bodyReader io.Reader
-	if config.Body != nil {
+	contentType := "application/json"
+
+	if config.ContentType != "" {
+		contentType = config.ContentType
+	}
+
+	if config.BodyReader != nil {
+		bodyReader = config.BodyReader
+	} else if config.Body != nil {
 		bodyBytes, _ := json.Marshal(config.Body)
 		bodyReader = bytes.NewReader(bodyBytes)
 	}
@@ -133,7 +143,7 @@ func (c *Client) executeRequest(ctx context.Context, reqURL string, config Reque
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("X-Request-Id", requestID)
 	for k, v := range authHeaders {
 		req.Header.Set(k, v)
@@ -150,13 +160,28 @@ func (c *Client) executeRequest(ctx context.Context, reqURL string, config Reque
 	body, _ := io.ReadAll(resp.Body)
 
 	// 4. Error Normalization
+	if serverRequestID := resp.Header.Get("X-Request-Id"); serverRequestID != "" {
+		requestID = serverRequestID
+	}
+
 	if resp.StatusCode >= 400 {
 		var errBody struct {
 			Code    string                 `json:"code"`
 			Message string                 `json:"message"`
 			Details map[string]interface{} `json:"details"`
+			Error   *struct {
+				Code    string                 `json:"code"`
+				Message string                 `json:"message"`
+				Details map[string]interface{} `json:"details"`
+			} `json:"error"`
 		}
 		json.Unmarshal(body, &errBody)
+
+		if errBody.Error != nil {
+			errBody.Code = errBody.Error.Code
+			errBody.Message = errBody.Error.Message
+			errBody.Details = errBody.Error.Details
+		}
 
 		retryAfter := 0
 		if ra := resp.Header.Get("Retry-After"); ra != "" {

@@ -1,0 +1,248 @@
+# Release Pipeline for Luna SDK
+# Triggered on version tags (v*)
+# Handles publishing to npm, PyPI, and Go proxy
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  id-token: write
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+  GO_VERSION: '1.21'
+
+jobs:
+  # ==================== VALIDATE TAG ====================
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Check if prerelease (contains alpha, beta, rc)
+          if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "Version: $VERSION"
+
+  # ==================== BUILD ARTIFACTS ====================
+  build:
+    name: Build All Packages
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+      
+      # TypeScript
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Build TypeScript SDK
+        working-directory: packages/typescript
+        run: |
+          npm ci
+          npm run build
+      
+      - name: Upload TypeScript dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: typescript-dist
+          path: packages/typescript/dist
+      
+      # Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Build Python SDK
+        working-directory: packages/python
+        run: |
+          pip install build
+          python -m build
+      
+      - name: Upload Python dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: packages/python/dist
+      
+      # Go (verify build)
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Build Go SDK
+        working-directory: packages/go
+        run: go build ./...
+
+  # ==================== PUBLISH NPM ====================
+  publish-npm:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: [validate, build]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Download TypeScript dist
+        uses: actions/download-artifact@v4
+        with:
+          name: typescript-dist
+          path: packages/typescript/dist
+      
+      - name: Install dependencies
+        working-directory: packages/typescript
+        run: npm ci
+      
+      - name: Publish to npm
+        working-directory: packages/typescript
+        run: |
+          if [[ "${{ needs.validate.outputs.is_prerelease }}" == "true" ]]; then
+            npm publish --tag next --access public
+          else
+            npm publish --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ==================== PUBLISH PYPI ====================
+  publish-pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: [validate, build]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Download Python dist
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist
+          path: packages/python/dist
+      
+      - name: Install twine
+        run: pip install twine
+      
+      - name: Publish to PyPI
+        working-directory: packages/python
+        run: |
+          twine upload dist/* --skip-existing
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+  # ==================== GO PROXY ====================
+  publish-go:
+    name: Trigger Go Proxy
+    runs-on: ubuntu-latest
+    needs: [validate, build]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Trigger Go Proxy cache
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          # Trigger go proxy to fetch the new version
+          curl -s "https://proxy.golang.org/github.com/eclipse-softworks/luna-sdk-go/@v/v${VERSION}.info" || true
+          curl -s "https://sum.golang.org/lookup/github.com/eclipse-softworks/luna-sdk-go@v${VERSION}" || true
+          echo "Go proxy triggered for v${VERSION}"
+
+  # ==================== CREATE GITHUB RELEASE ====================
+  github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [validate, publish-npm, publish-pypi, publish-go]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: Generate release notes
+        id: changelog
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          
+          # Extract changelog for this version
+          if [ -f CHANGELOG.md ]; then
+            # Extract section for this version
+            NOTES=$(awk "/## \[${VERSION}\]|## \[v${VERSION}\]/{flag=1; next} /## \[/{flag=0} flag" CHANGELOG.md)
+            if [ -z "$NOTES" ]; then
+              NOTES="Release v${VERSION}"
+            fi
+          else
+            NOTES="Release v${VERSION}"
+          fi
+          
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: v${{ needs.validate.outputs.version }}
+          body: |
+            ## Luna SDK v${{ needs.validate.outputs.version }}
+            
+            ${{ steps.changelog.outputs.notes }}
+            
+            ### Installation
+            
+            **TypeScript/JavaScript:**
+            ```bash
+            npm install @eclipse-softworks/luna-sdk@${{ needs.validate.outputs.version }}
+            ```
+            
+            **Python:**
+            ```bash
+            pip install luna-sdk==${{ needs.validate.outputs.version }}
+            ```
+            
+            **Go:**
+            ```bash
+            go get github.com/eclipse-softworks/luna-sdk-go@v${{ needs.validate.outputs.version }}
+            ```
+          draft: false
+          prerelease: ${{ needs.validate.outputs.is_prerelease == 'true' }}
+          files: |
+            artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

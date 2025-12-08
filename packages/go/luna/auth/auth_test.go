@@ -10,47 +10,49 @@ const validAPIKey = "lk_test_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 func TestAPIKeyAuth(t *testing.T) {
 	t.Run("creates auth with valid key", func(t *testing.T) {
-		a := auth.NewAPIKeyAuth(validAPIKey)
+		a, err := auth.NewAPIKeyAuth(validAPIKey)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		if a == nil {
 			t.Fatal("expected auth to be created")
 		}
 	})
 
-	t.Run("panics on empty key", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Fatal("expected panic")
-			}
-		}()
-		auth.NewAPIKeyAuth("")
+	t.Run("returns error on empty key", func(t *testing.T) {
+		_, err := auth.NewAPIKeyAuth("")
+		if err == nil {
+			t.Fatal("expected error")
+		}
 	})
 
-	t.Run("panics on invalid format", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Fatal("expected panic")
-			}
-		}()
-		auth.NewAPIKeyAuth("invalid-key")
+	t.Run("returns error on invalid format", func(t *testing.T) {
+		_, err := auth.NewAPIKeyAuth("invalid-key")
+		if err == nil {
+			t.Fatal("expected error")
+		}
 	})
 
 	t.Run("returns correct headers", func(t *testing.T) {
-		a := auth.NewAPIKeyAuth(validAPIKey)
+		a, err := auth.NewAPIKeyAuth(validAPIKey)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		headers, err := a.GetHeaders()
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		expected := map[string]string{"X-Luna-Api-Key": validAPIKey}
-		for k, v := range expected {
-			if headers[k] != v {
-				t.Errorf("expected %s=%s, got %s", k, v, headers[k])
-			}
+		if headers["Authorization"] != "Bearer "+validAPIKey {
+			t.Errorf("expected Authorization=Bearer %s, got %s", validAPIKey, headers["Authorization"])
 		}
 	})
 
 	t.Run("does not need refresh", func(t *testing.T) {
-		a := auth.NewAPIKeyAuth(validAPIKey)
+		a, err := auth.NewAPIKeyAuth(validAPIKey)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		if a.NeedsRefresh() {
 			t.Error("expected NeedsRefresh to be false")
 		}
@@ -59,23 +61,27 @@ func TestAPIKeyAuth(t *testing.T) {
 
 func TestTokenAuth(t *testing.T) {
 	t.Run("creates auth with access token", func(t *testing.T) {
-		a := auth.NewTokenAuth("access-token", "refresh-token", nil)
+		a, err := auth.NewTokenAuth("access-token", "refresh-token", nil)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		if a == nil {
 			t.Fatal("expected auth to be created")
 		}
 	})
 
-	t.Run("panics on empty access token", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Fatal("expected panic")
-			}
-		}()
-		auth.NewTokenAuth("", "refresh-token", nil)
+	t.Run("returns error on empty access token", func(t *testing.T) {
+		_, err := auth.NewTokenAuth("", "refresh-token", nil)
+		if err == nil {
+			t.Fatal("expected error")
+		}
 	})
 
 	t.Run("returns correct headers", func(t *testing.T) {
-		a := auth.NewTokenAuth("access-token", "refresh-token", nil)
+		a, err := auth.NewTokenAuth("access-token", "refresh-token", nil)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		headers, err := a.GetHeaders()
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
@@ -88,7 +94,10 @@ func TestTokenAuth(t *testing.T) {
 	})
 
 	t.Run("does not need refresh without expiry", func(t *testing.T) {
-		a := auth.NewTokenAuth("access-token", "refresh-token", nil)
+		a, err := auth.NewTokenAuth("access-token", "refresh-token", nil)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		if a.NeedsRefresh() {
 			t.Error("expected NeedsRefresh to be false")
 		}

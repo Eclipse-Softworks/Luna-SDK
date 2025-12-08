@@ -33,7 +33,7 @@ func (r *WorkflowsResource) List(ctx context.Context) (*WorkflowList, error) {
 }
 
 // Trigger triggers a workflow execution
-func (r *WorkflowsResource) Trigger(ctx context.Context, id string, params interface{}) (*WorkflowRun, error) {
+func (r *WorkflowsResource) Trigger(ctx context.Context, id string, params any) (*WorkflowRun, error) {
 	resp, err := r.client.Request(ctx, lunahttp.RequestConfig{
 		Method: "POST",
 		Path:   fmt.Sprintf("%s/%s/trigger", r.basePath, id),

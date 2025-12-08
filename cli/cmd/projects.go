@@ -32,7 +32,10 @@ var projectsListCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
 		}
 
-		client := luna.NewClient(luna.WithAPIKey(apiKey))
+		client, err := luna.NewClient(luna.WithAPIKey(apiKey))
+		if err != nil {
+			return fmt.Errorf("failed to create client: %w", err)
+		}
 
 		projects, err := client.Projects().List(cmd.Context(), &luna.ListParams{
 			Limit:  limit,
@@ -63,7 +66,10 @@ var projectsGetCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
 		}
 
-		client := luna.NewClient(luna.WithAPIKey(apiKey))
+		client, err := luna.NewClient(luna.WithAPIKey(apiKey))
+		if err != nil {
+			return fmt.Errorf("failed to create client: %w", err)
+		}
 
 		project, err := client.Projects().Get(cmd.Context(), projectID)
 		if err != nil {
@@ -95,7 +101,10 @@ var projectsCreateCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
 		}
 
-		client := luna.NewClient(luna.WithAPIKey(apiKey))
+		client, err := luna.NewClient(luna.WithAPIKey(apiKey))
+		if err != nil {
+			return fmt.Errorf("failed to create client: %w", err)
+		}
 
 		project, err := client.Projects().Create(cmd.Context(), luna.ProjectCreate{
 			Name:        name,
@@ -126,9 +135,12 @@ var projectsDeleteCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
 		}
 
-		client := luna.NewClient(luna.WithAPIKey(apiKey))
+		client, err := luna.NewClient(luna.WithAPIKey(apiKey))
+		if err != nil {
+			return fmt.Errorf("failed to create client: %w", err)
+		}
 
-		err := client.Projects().Delete(cmd.Context(), projectID)
+		err = client.Projects().Delete(cmd.Context(), projectID)
 		if err != nil {
 			return fmt.Errorf("failed to delete project: %w", err)
 		}

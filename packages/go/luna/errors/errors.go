@@ -38,6 +38,9 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
+	if e.RequestID != "" {
+		return fmt.Sprintf("[%s] %s (Request ID: %s)", e.Code, e.Message, e.RequestID)
+	}
 	return fmt.Sprintf("[%s] %s", e.Code, e.Message)
 }
 
