@@ -114,7 +114,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
       
       - name: Download TypeScript dist
         uses: actions/download-artifact@v6
@@ -126,13 +125,19 @@ jobs:
         working-directory: packages/typescript
         run: npm ci
       
+      - name: Create local .npmrc
+        working-directory: packages/typescript
+        run: |
+          echo "@eclipse-softworks:registry=https://registry.npmjs.org/" > .npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+      
       - name: Publish to npm (with provenance)
         working-directory: packages/typescript
         run: |
           if [[ "${{ needs.validate.outputs.is_prerelease }}" == "true" ]]; then
-            npm publish --tag next --access public --provenance
+            npm publish --tag next --access public --provenance --userconfig .npmrc
           else
-            npm publish --access public --provenance
+            npm publish --access public --provenance --userconfig .npmrc
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
