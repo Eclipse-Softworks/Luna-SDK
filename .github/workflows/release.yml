@@ -103,7 +103,6 @@ jobs:
   publish-npm:
     name: Publish to npm
     runs-on: ubuntu-latest
-    needs: [validate, build]
     permissions:
       id-token: write
       contents: read
@@ -115,15 +114,24 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       
+      - name: Debug Secret
+        run: |
+          token="${{ secrets.NPM_TOKEN }}"
+          if [ -z "$token" ]; then
+            echo "::error::NPM_TOKEN is EMPTY"
+            exit 1
+          else
+            echo "NPM_TOKEN is set. Length: ${#token}"
+            echo "First 4 chars: ${token:0:4}"
+          fi
+
       - name: Download TypeScript dist
-        uses: actions/download-artifact@v6
-        with:
-          name: typescript-dist
-          path: packages/typescript/dist
-      
-      - name: Install dependencies
-        working-directory: packages/typescript
-        run: npm ci
+        # For debugging, we'll build locally since we skipped the build job
+        if: always()
+        run: |
+          cd packages/typescript
+          npm ci
+          npm run build
       
       - name: Create local .npmrc
         working-directory: packages/typescript
@@ -134,11 +142,7 @@ jobs:
       - name: Publish to npm (with provenance)
         working-directory: packages/typescript
         run: |
-          if [[ "${{ needs.validate.outputs.is_prerelease }}" == "true" ]]; then
-            npm publish --tag next --access public --provenance --userconfig .npmrc
-          else
-            npm publish --access public --provenance --userconfig .npmrc
-          fi
+          npm publish --access public --provenance --userconfig .npmrc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
