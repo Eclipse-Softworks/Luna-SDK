@@ -45,13 +45,14 @@ export class LunaError extends Error {
 
     /** Check if this error is retryable */
     get retryable(): boolean {
-        return [
+        const retryableCodes: string[] = [
             ErrorCode.RATE_LIMIT_EXCEEDED,
             ErrorCode.NETWORK_TIMEOUT,
             ErrorCode.NETWORK_CONNECTION,
             ErrorCode.SERVER_INTERNAL,
             ErrorCode.SERVER_UNAVAILABLE,
-        ].includes(this.code as ErrorCodeType);
+        ];
+        return retryableCodes.includes(this.code);
     }
 
     toJSON(): Record<string, unknown> {

@@ -1,3 +1,5 @@
+import { AuthenticationError } from '../errors/base.js';
+import { ErrorCode } from '../errors/codes.js';
 import type { AuthProvider } from './types.js';
 
 /**
@@ -15,10 +17,18 @@ export class ApiKeyAuth implements AuthProvider {
 
     constructor(apiKey: string) {
         if (!apiKey) {
-            throw new Error('API key is required');
+            throw new AuthenticationError({
+                code: ErrorCode.AUTH_INVALID_KEY,
+                message: 'API key is required',
+                requestId: 'local',
+            });
         }
         if (!this.isValidApiKey(apiKey)) {
-            throw new Error('Invalid API key format. Expected: lk_<env>_<key>');
+            throw new AuthenticationError({
+                code: ErrorCode.AUTH_INVALID_KEY,
+                message: 'Invalid API key format. Expected: lk_<env>_<key>',
+                requestId: 'local',
+            });
         }
         this.apiKey = apiKey;
     }

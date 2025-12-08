@@ -18,11 +18,9 @@ const REDACT_PATTERNS = [
  * Console-based logger with redaction support
  */
 export class ConsoleLogger implements Logger {
-    private readonly level: LogLevel;
     private readonly levelPriority: number;
 
     constructor(level: LogLevel = 'info') {
-        this.level = level;
         this.levelPriority = LOG_LEVEL_PRIORITY[level];
     }
 
