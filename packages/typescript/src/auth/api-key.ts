@@ -35,7 +35,7 @@ export class ApiKeyAuth implements AuthProvider {
 
     async getHeaders(): Promise<Record<string, string>> {
         return {
-            'X-Luna-Api-Key': this.apiKey,
+            'Authorization': `Bearer ${this.apiKey}`,
         };
     }
 

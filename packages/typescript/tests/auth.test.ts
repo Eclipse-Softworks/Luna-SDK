@@ -3,7 +3,7 @@ import { ApiKeyAuth } from '../src/auth/api-key.js';
 import { TokenAuth } from '../src/auth/token.js';
 
 describe('ApiKeyAuth', () => {
-    const validApiKey = 'lk_test_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const validApiKey = 'lk_test_12345678901234567890123456789012';
 
     it('should create auth with valid API key', () => {
         const auth = new ApiKeyAuth(validApiKey);
@@ -25,7 +25,7 @@ describe('ApiKeyAuth', () => {
         const headers = await auth.getHeaders();
 
         expect(headers).toEqual({
-            'X-Luna-Api-Key': validApiKey,
+            'Authorization': `Bearer ${validApiKey}`,
         });
     });
 

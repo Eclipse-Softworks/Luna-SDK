@@ -145,11 +145,105 @@ export interface Campus {
 }
 
 /**
+ * List of campuses
+ */
+export type CampusList = ListResponse<Campus>;
+
+/**
  * Paginated list of residences
  */
 export type ResidenceList = ListResponse<Residence>;
 
 /**
- * List of campuses
+ * Group resource
  */
-export type CampusList = ListResponse<Campus>;
+export interface Group {
+    id: string;
+    name: string;
+    description?: string;
+    permissions: string[];
+    member_ids: string[];
+}
+
+/**
+ * Paginated list of groups
+ */
+export type GroupList = ListResponse<Group>;
+
+/**
+ * Parameters for creating a group
+ */
+export interface GroupCreate {
+    name: string;
+    description?: string;
+    permissions?: string[];
+    member_ids?: string[];
+}
+
+/**
+ * Storage Bucket
+ */
+export interface Bucket {
+    id: string;
+    name: string;
+    region: string;
+}
+
+/**
+ * List of buckets
+ */
+export type BucketList = ListResponse<Bucket>;
+
+/**
+ * File Object
+ */
+export interface FileObject {
+    id: string;
+    bucket_id: string;
+    key: string;
+    size: number;
+    content_type: string;
+    url: string;
+}
+
+/**
+ * AI Completion Request
+ */
+export interface CompletionRequest {
+    model: string;
+    messages: { role: 'system' | 'user' | 'assistant'; content: string }[];
+    temperature?: number;
+}
+
+/**
+ * AI Completion Response
+ */
+export interface CompletionResponse {
+    id: string;
+    choices: { index: number; message: { role: string; content: string } }[];
+}
+
+/**
+ * Automation Workflow
+ */
+export interface Workflow {
+    id: string;
+    name: string;
+    trigger_type: 'event' | 'schedule' | 'webhook';
+    is_active: boolean;
+}
+
+/**
+ * Workflow List
+ */
+export type WorkflowList = ListResponse<Workflow>;
+
+/**
+ * Workflow Run
+ */
+export interface WorkflowRun {
+    id: string;
+    workflow_id: string;
+    status: 'pending' | 'running' | 'completed' | 'failed';
+    started_at: string;
+}

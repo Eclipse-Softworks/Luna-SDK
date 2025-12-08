@@ -3,6 +3,10 @@ import { ApiKeyAuth, TokenAuth, type AuthProvider } from './auth/index.js';
 import { UsersResource } from './resources/users.js';
 import { ProjectsResource } from './resources/projects.js';
 import { ResMateResource } from './resources/resmate.js';
+import { IdentityResource } from './resources/identity.js';
+import { StorageResource } from './resources/storage.js';
+import { AiResource } from './resources/ai.js';
+import { AutomationResource } from './resources/automation.js';
 import { ConsoleLogger, type Logger, type LogLevel, type TelemetryConfig } from './telemetry/index.js';
 
 /**
@@ -85,6 +89,18 @@ export class LunaClient {
     /** ResMate resource */
     public readonly resMate: ResMateResource;
 
+    /** Identity resource */
+    public readonly identity: IdentityResource;
+
+    /** Storage resource */
+    public readonly storage: StorageResource;
+
+    /** AI resource */
+    public readonly ai: AiResource;
+
+    /** Automation resource */
+    public readonly automation: AutomationResource;
+
     constructor(config: ClientConfig) {
         // Validate config
         if (!config.apiKey && !config.accessToken) {
@@ -119,6 +135,10 @@ export class LunaClient {
         this.users = new UsersResource(this.httpClient);
         this.projects = new ProjectsResource(this.httpClient);
         this.resMate = new ResMateResource(this.httpClient);
+        this.identity = new IdentityResource(this.httpClient);
+        this.storage = new StorageResource(this.httpClient);
+        this.ai = new AiResource(this.httpClient);
+        this.automation = new AutomationResource(this.httpClient);
 
         this.logger.debug('LunaClient initialized', {
             baseUrl: config.baseUrl ?? DEFAULT_BASE_URL,

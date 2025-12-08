@@ -2,6 +2,7 @@ import type { RequestConfig, Response, HttpClientConfig } from './types.js';
 import { RetryHandler } from './retry.js';
 import { createError, NetworkError, LunaError } from '../errors/base.js';
 import { ErrorCode } from '../errors/codes.js';
+import { getSystemInfo } from '../utils/system.js';
 
 export class HttpClient {
     private readonly baseUrl: string;
@@ -44,6 +45,7 @@ export class HttpClient {
                     this.retryHandler.isRetryable(status, lastError);
 
                 if (!shouldRetry) {
+                    console.log('DEBUG: Not retrying', { attempt, status, error: lastError });
                     this.logger.error('HTTP request failed', {
                         request_id: requestId,
                         method: config.method,
@@ -85,7 +87,7 @@ export class HttpClient {
             'Content-Type': 'application/json',
             Accept: 'application/json',
             'X-Request-Id': requestId,
-            'User-Agent': `luna-sdk-typescript/1.0.0`,
+            'User-Agent': this.getUserAgent(),
             ...authHeaders,
             ...config.headers,
         };
@@ -125,9 +127,14 @@ export class HttpClient {
                     ? parseInt(responseHeaders['retry-after'], 10)
                     : undefined;
 
+                let errorBody = body as { code?: string; message?: string; details?: Record<string, unknown>; error?: unknown };
+                if (errorBody && typeof errorBody === 'object' && 'error' in errorBody && errorBody.error) {
+                    errorBody = errorBody.error as typeof errorBody;
+                }
+
                 throw createError(
                     response.status,
-                    body as { code?: string; message?: string; details?: Record<string, unknown> },
+                    errorBody,
                     serverRequestId,
                     retryAfter
                 );
@@ -191,5 +198,10 @@ export class HttpClient {
 
     private generateRequestId(): string {
         return `req_${Date.now().toString(36)}${Math.random().toString(36).substring(2, 10)}`;
+    }
+
+    private getUserAgent(): string {
+        const info = getSystemInfo();
+        return `luna-sdk-typescript/1.0.0 (${info.os}; ${info.arch}) ${info.runtime}/${info.runtimeVersion}`;
     }
 }

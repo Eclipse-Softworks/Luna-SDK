@@ -15,6 +15,13 @@ export class TokenAuth implements AuthProvider {
         expiresAt?: Date;
         onRefresh?: TokenRefreshCallback;
     }) {
+        if (!config.accessToken) {
+            throw new AuthenticationError({
+                code: ErrorCode.AUTH_INVALID_KEY,
+                message: 'Access token is required',
+                requestId: 'local',
+            });
+        }
         this.accessToken = config.accessToken;
         this.refreshToken = config.refreshToken;
         this.expiresAt = config.expiresAt;
@@ -86,6 +93,15 @@ export class TokenAuth implements AuthProvider {
                 refreshToken: this.refreshToken,
                 expiresAt: this.expiresAt,
             });
+        }
+    }
+    updateTokens(tokens: { accessToken: string; refreshToken?: string; expiresAt?: Date }): void {
+        this.accessToken = tokens.accessToken;
+        if (tokens.refreshToken) {
+            this.refreshToken = tokens.refreshToken;
+        }
+        if (tokens.expiresAt) {
+            this.expiresAt = tokens.expiresAt;
         }
     }
 }
