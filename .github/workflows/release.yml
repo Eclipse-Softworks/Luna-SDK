@@ -103,6 +103,7 @@ jobs:
   publish-npm:
     name: Publish to npm
     runs-on: ubuntu-latest
+    environment: npm
     permissions:
       id-token: write
       contents: read
