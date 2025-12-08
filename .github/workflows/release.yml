@@ -123,6 +123,9 @@ jobs:
         working-directory: packages/typescript
         run: npm ci
       
+      - name: Set up npm authentication
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      
       - name: Publish to npm
         working-directory: packages/typescript
         run: |
