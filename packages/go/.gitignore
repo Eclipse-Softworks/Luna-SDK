@@ -1,0 +1,13 @@
+.git/
+.idea/
+.vscode/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.txt
+coverage.html
+vendor/
+dist/

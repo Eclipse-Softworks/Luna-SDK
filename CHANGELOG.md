@@ -7,13 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.0] - 2024-XX-XX
+## [1.0.0] - 2025-12-08
 
 ### Added
-- Initial release of Luna SDK
+
+#### SDK Core
 - TypeScript, Python, and Go client libraries
-- API key and OAuth token authentication
-- Users and Projects resource support
-- Automatic retry with exponential backoff
-- OpenTelemetry integration for logging and metrics
-- Luna CLI tool
+- API key authentication (`lk_<env>_<key>` format)
+- OAuth token authentication with automatic refresh
+- Users and Projects resource support (CRUD operations)
+- Automatic retry with exponential backoff and jitter
+- Configurable timeouts and max retries
+- Environment variable configuration loading
+- Structured JSON logging with sensitive data redaction
+
+#### TypeScript SDK
+- ESM/CJS dual output with full TypeScript types
+- Vitest test suite with coverage thresholds
+- ESLint + Prettier for code quality
+- npm publishing configuration
+
+#### Python SDK
+- Async/await support with httpx
+- Pydantic models for request/response validation
+- pytest test suite with async support
+- ruff + mypy for linting and type checking
+- PyPI publishing configuration
+
+#### Go SDK
+- Idiomatic Go with functional options pattern
+- Thread-safe token refresh
+- golangci-lint for code quality
+- Makefile for build/test/lint commands
+
+#### CLI
+- Luna CLI tool built with Cobra
+- Commands: `auth`, `users`, `projects`, `config`
+- Multiple output formats: table, JSON, YAML
+- Profile-based configuration (`~/.luna/config.yaml`)
+- Browser-based OAuth login flow
+
+#### Documentation
+- OpenAPI 3.1.0 specification
+- Canonical error codes schema
+- README with quick start examples for all languages
+
