@@ -1,0 +1,61 @@
+{
+    "name": "@eclipse/luna-sdk",
+    "version": "1.0.0",
+    "description": "Official TypeScript SDK for the Eclipse Softworks Platform API",
+    "author": "Eclipse Softworks",
+    "license": "MIT",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage",
+        "lint": "eslint src --ext .ts",
+        "lint:fix": "eslint src --ext .ts --fix",
+        "format": "prettier --write src",
+        "typecheck": "tsc --noEmit",
+        "clean": "rimraf dist"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "keywords": [
+        "eclipse",
+        "luna",
+        "sdk",
+        "api",
+        "client"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/eclipse-softworks/luna-sdk.git",
+        "directory": "packages/typescript"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "eslint": "^8.56.0",
+        "prettier": "^3.2.0",
+        "rimraf": "^5.0.5",
+        "tsup": "^8.0.1",
+        "typescript": "^5.3.3",
+        "vitest": "^1.1.0"
+    }
+}

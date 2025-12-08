@@ -1,0 +1,64 @@
+{
+    "errors": {
+        "LUNA_ERR_AUTH_INVALID_KEY": {
+            "status": 401,
+            "message": "Invalid API key provided",
+            "retryable": false
+        },
+        "LUNA_ERR_AUTH_TOKEN_EXPIRED": {
+            "status": 401,
+            "message": "Access token has expired",
+            "retryable": false
+        },
+        "LUNA_ERR_AUTH_INSUFFICIENT_PERMISSIONS": {
+            "status": 403,
+            "message": "Insufficient permissions for this action",
+            "retryable": false
+        },
+        "LUNA_ERR_RATE_LIMIT_EXCEEDED": {
+            "status": 429,
+            "message": "Rate limit exceeded",
+            "retryable": true
+        },
+        "LUNA_ERR_RESOURCE_NOT_FOUND": {
+            "status": 404,
+            "message": "Resource not found",
+            "retryable": false
+        },
+        "LUNA_ERR_RESOURCE_CONFLICT": {
+            "status": 409,
+            "message": "Resource conflict",
+            "retryable": false
+        },
+        "LUNA_ERR_VALIDATION_FAILED": {
+            "status": 400,
+            "message": "Validation failed",
+            "retryable": false
+        },
+        "LUNA_ERR_VALIDATION_INVALID_PARAMETER": {
+            "status": 400,
+            "message": "Invalid parameter",
+            "retryable": false
+        },
+        "LUNA_ERR_NETWORK_TIMEOUT": {
+            "status": 408,
+            "message": "Request timeout",
+            "retryable": true
+        },
+        "LUNA_ERR_NETWORK_CONNECTION": {
+            "status": 0,
+            "message": "Connection error",
+            "retryable": true
+        },
+        "LUNA_ERR_SERVER_INTERNAL": {
+            "status": 500,
+            "message": "Internal server error",
+            "retryable": true
+        },
+        "LUNA_ERR_SERVER_UNAVAILABLE": {
+            "status": 503,
+            "message": "Service unavailable",
+            "retryable": true
+        }
+    }
+}
