@@ -37,15 +37,32 @@ type (
 	ServerError         = errors.ServerError
 
 	// Resource types
-	User          = resources.User
-	UserCreate    = resources.UserCreate
-	UserUpdate    = resources.UserUpdate
-	UserList      = resources.UserList
-	Project       = resources.Project
-	ProjectCreate = resources.ProjectCreate
-	ProjectUpdate = resources.ProjectUpdate
-	ProjectList   = resources.ProjectList
-	ListParams    = resources.ListParams
+	User               = resources.User
+	UserCreate         = resources.UserCreate
+	UserUpdate         = resources.UserUpdate
+	UserList           = resources.UserList
+	Project            = resources.Project
+	ProjectCreate      = resources.ProjectCreate
+	ProjectUpdate      = resources.ProjectUpdate
+	ProjectList        = resources.ProjectList
+	ListParams         = resources.ListParams
+	Residence          = resources.Residence
+	ResidenceList      = resources.ResidenceList
+	Campus             = resources.Campus
+	CampusList         = resources.CampusList
+	Group              = resources.Group
+	GroupCreate        = resources.GroupCreate
+	GroupList          = resources.GroupList
+	Bucket             = resources.Bucket
+	BucketList         = resources.BucketList
+	FileObject         = resources.FileObject
+	CompletionRequest  = resources.CompletionRequest
+	CompletionResponse = resources.CompletionResponse
+	Message            = resources.Message
+	Choice             = resources.Choice
+	Workflow           = resources.Workflow
+	WorkflowList       = resources.WorkflowList
+	WorkflowRun        = resources.WorkflowRun
 )
 
 // Client configuration options
@@ -76,6 +93,11 @@ type Client struct {
 	httpClient *lunahttp.Client
 	users      *resources.UsersResource
 	projects   *resources.ProjectsResource
+	resMate    *resources.ResMateResource
+	identity   *resources.IdentityResource
+	storage    *resources.StorageResource
+	ai         *resources.AiResource
+	automation *resources.AutomationResource
 }
 
 // NewClient creates a new Luna SDK client
@@ -127,6 +149,11 @@ func NewClient(opts ...Option) *Client {
 	// Initialize resources
 	client.users = resources.NewUsersResource(httpClient)
 	client.projects = resources.NewProjectsResource(httpClient)
+	client.resMate = resources.NewResMateResource(httpClient)
+	client.identity = resources.NewIdentityResource(httpClient)
+	client.storage = resources.NewStorageResource(httpClient)
+	client.ai = resources.NewAiResource(httpClient)
+	client.automation = resources.NewAutomationResource(httpClient)
 
 	logger.Debug("LunaClient initialized", map[string]interface{}{
 		"base_url":  config.baseURL,
@@ -144,6 +171,31 @@ func (c *Client) Users() *resources.UsersResource {
 // Projects returns the Projects resource
 func (c *Client) Projects() *resources.ProjectsResource {
 	return c.projects
+}
+
+// ResMate returns the ResMate resource
+func (c *Client) ResMate() *resources.ResMateResource {
+	return c.resMate
+}
+
+// Identity returns the Identity resource
+func (c *Client) Identity() *resources.IdentityResource {
+	return c.identity
+}
+
+// Storage returns the Storage resource
+func (c *Client) Storage() *resources.StorageResource {
+	return c.storage
+}
+
+// AI returns the AI resource
+func (c *Client) AI() *resources.AiResource {
+	return c.ai
+}
+
+// Automation returns the Automation resource
+func (c *Client) Automation() *resources.AutomationResource {
+	return c.automation
 }
 
 // WithAPIKey sets the API key for authentication
