@@ -112,7 +112,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
-          scope: '@moon9t'
       
       - name: Download TypeScript dist
         uses: actions/download-artifact@v6
@@ -124,13 +123,19 @@ jobs:
         working-directory: packages/typescript
         run: npm ci
       
+      - name: Create .npmrc
+        working-directory: packages/typescript
+        run: |
+          echo "@moon9t:registry=https://registry.npmjs.org/" > .npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+      
       - name: Publish to npm
         working-directory: packages/typescript
         run: |
           if [[ "${{ needs.validate.outputs.is_prerelease }}" == "true" ]]; then
-            npm publish --tag next --access public
+            npm publish --tag next --access public --userconfig .npmrc
           else
-            npm publish --access public
+            npm publish --access public --userconfig .npmrc
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
