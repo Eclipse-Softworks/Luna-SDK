@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -75,9 +74,4 @@ func getAPIKey() string {
 	}
 
 	return ""
-}
-
-// printError prints an error message
-func printError(err error) {
-	fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 }

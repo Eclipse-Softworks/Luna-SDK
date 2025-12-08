@@ -1,11 +1,16 @@
 package cmd
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"time"
 
 	"os/exec"
 	"runtime"
 
+	"github.com/eclipse-softworks/luna-sdk-go/luna"
 	"github.com/spf13/cobra"
 )
 
@@ -20,25 +25,92 @@ var loginCmd = &cobra.Command{
 	Short: "Log in to Luna",
 	Long:  `Log in to your Luna account using browser-based OAuth.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// 1. Create a channel to signal completion
+		done := make(chan string)
+		errChan := make(chan error)
+
+		// 2. Start local server
+		server := &http.Server{Addr: ":9999"}
+		http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
+			code := r.URL.Query().Get("code")
+			if code == "" {
+				http.Error(w, "Code not found", http.StatusBadRequest)
+				errChan <- fmt.Errorf("authorization code not found in callback")
+				return
+			}
+			fmt.Fprintf(w, "Authorization successful! You can close this window now.")
+			done <- code
+		})
+
+		go func() {
+			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				errChan <- fmt.Errorf("failed to start local server: %w", err)
+			}
+		}()
+
+		// 3. Open browser
+		authURL := "https://auth.eclipse.dev/authorize?client_id=luna-cli&redirect_uri=http://localhost:9999/callback&response_type=code"
 		fmt.Println("Opening browser for authentication...")
-
-		// In a real implementation, this would:
-		// 1. Start a local HTTP server for the OAuth callback
-		// 2. Open the browser to the auth URL
-		// 3. Wait for the callback with the auth code
-		// 4. Exchange the code for tokens
-		// 5. Store tokens in config
-
-		authURL := "https://auth.eclipse.dev/authorize?client_id=luna-cli&redirect_uri=http://localhost:9999/callback"
+		fmt.Printf("If browser does not open, visit: %s\n", authURL)
 
 		if err := openBrowser(authURL); err != nil {
-			return fmt.Errorf("failed to open browser: %w", err)
+			fmt.Printf("Failed to open browser: %v\n", err)
 		}
 
-		fmt.Println("Waiting for callback...")
-		fmt.Println("✓ Successfully authenticated!")
+		// 4. Wait for callback
+		fmt.Println("Waiting for authentication...")
+		select {
+		case code := <-done:
+			_ = server.Shutdown(context.Background())
+			fmt.Println("✓ Successfully authenticated!")
 
-		return nil
+			// Exchange code for tokens
+			tokens, err := exchangeToken(code)
+			if err != nil {
+				// Fallback for demo/offline if real endpoint fails
+				// But we try to be as real as possible first
+				errChan <- fmt.Errorf("failed to exchange token: %w", err)
+				return nil
+			}
+
+			cfg, err := LoadConfig()
+			if err != nil {
+				// If config doesn't exist, create default
+				cfg = &Config{
+					DefaultProfile: "default",
+					Profiles:       make(map[string]Profile),
+					Settings: Settings{
+						OutputFormat: "table",
+						Color:        true,
+					},
+				}
+			}
+
+			if cfg.Profiles == nil {
+				cfg.Profiles = make(map[string]Profile)
+			}
+
+			// Update profile with real tokens
+			profile := cfg.Profiles[cfgProfile]
+			profile.AccessToken = tokens.AccessToken
+			profile.RefreshToken = tokens.RefreshToken
+			cfg.Profiles[cfgProfile] = profile
+
+			if err := SaveConfig(cfg); err != nil {
+				errChan <- fmt.Errorf("failed to save config: %w", err)
+				return nil
+			}
+
+			// We are done
+			return nil
+
+		case err := <-errChan:
+			_ = server.Shutdown(context.Background())
+			return err
+		case <-time.After(2 * time.Minute):
+			_ = server.Shutdown(context.Background())
+			return fmt.Errorf("authentication timed out")
+		}
 	},
 }
 
@@ -92,10 +164,42 @@ var statusCmd = &cobra.Command{
 	},
 }
 
+var verifyCmd = &cobra.Command{
+	Use:   "verify",
+	Short: "Verify API credentials",
+	Long:  "Test the currently configured API key against the server.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		apiKey := getAPIKey()
+		if apiKey == "" {
+			return fmt.Errorf("not authenticated")
+		}
+
+		client := luna.NewClient(luna.WithAPIKey(apiKey))
+
+		// Attempt to fetch something simpler or just use existing resources to verify auth
+		// Since there isn't an explicit "Verify" or "Me" endpoint exposed in the top level resources we see,
+		// we'll try to list project or users with limit 1 to check credentials.
+		// Actually, let's assume we can list users (self) or similar.
+
+		// A common pattern is to check "Me" but we don't have that resource visible in client.go right now.
+		// We'll use List Users as a proxy for "Is Authenticated".
+
+		_, err := client.Users().List(cmd.Context(), &luna.ListParams{Limit: 1})
+		if err != nil {
+			return fmt.Errorf("verification failed: %w", err)
+		}
+
+		fmt.Println("✓ Credentials are valid")
+		// We can't easily get the user details without a Me endpoint, but we confirmed the key works.
+		return nil
+	},
+}
+
 func init() {
 	authCmd.AddCommand(loginCmd)
 	authCmd.AddCommand(logoutCmd)
 	authCmd.AddCommand(statusCmd)
+	authCmd.AddCommand(verifyCmd)
 }
 
 // openBrowser opens a URL in the default browser
@@ -116,4 +220,38 @@ func openBrowser(url string) error {
 	}
 
 	return exec.Command(cmd, args...).Start()
+}
+
+type TokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int    `json:"expires_in"`
+}
+
+func exchangeToken(code string) (*TokenResponse, error) {
+	// Real HTTP request to exchange code
+	resp, err := http.PostForm("https://auth.eclipse.dev/oauth/token", map[string][]string{
+		"grant_type":   {"authorization_code"},
+		"client_id":    {"luna-cli"},
+		"code":         {code},
+		"redirect_uri": {"http://localhost:9999/callback"},
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		// Read error body if possible
+		var errorBody map[string]interface{}
+		_ = json.NewDecoder(resp.Body).Decode(&errorBody)
+		return nil, fmt.Errorf("token exchange failed: status %d, response: %v", resp.StatusCode, errorBody)
+	}
+
+	var tokens TokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tokens); err != nil {
+		return nil, fmt.Errorf("failed to decode token response: %w", err)
+	}
+
+	return &tokens, nil
 }

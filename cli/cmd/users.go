@@ -8,6 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 	yaml "gopkg.in/yaml.v3"
+
+	"github.com/eclipse-softworks/luna-sdk-go/luna"
 )
 
 var usersCmd = &cobra.Command{
@@ -31,17 +33,24 @@ var usersListCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
 		}
 
-		// In a real implementation, this would use the Luna SDK
-		// client := luna.NewClient(luna.WithAPIKey(apiKey))
-		// users, err := client.Users().List(ctx, &luna.ListParams{Limit: limit, Cursor: cursor})
+		client := luna.NewClient(luna.WithAPIKey(apiKey))
 
-		// Mock response for demonstration
-		users := []map[string]interface{}{
-			{"id": "usr_abc123", "name": "John Doe", "email": "john@example.com", "created_at": "2024-01-15"},
-			{"id": "usr_def456", "name": "Jane Smith", "email": "jane@example.com", "created_at": "2024-01-16"},
+		users, err := client.Users().List(cmd.Context(), &luna.ListParams{
+			Limit:  limit,
+			Cursor: cursor,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to list users: %w", err)
 		}
 
-		return outputUsers(users)
+		// Convert to map for output compatibility (or update output function)
+		// For now we map strictly to the output format expected
+		var output []map[string]interface{}
+		// Re-marshal to map for generic output handling
+		data, _ := json.Marshal(users.Data)
+		json.Unmarshal(data, &output)
+
+		return outputUsers(output)
 	},
 }
 
@@ -58,16 +67,18 @@ var usersGetCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
 		}
 
-		// Mock response for demonstration
-		user := map[string]interface{}{
-			"id":         userID,
-			"name":       "John Doe",
-			"email":      "john@example.com",
-			"created_at": "2024-01-15",
-			"updated_at": "2024-01-15",
+		client := luna.NewClient(luna.WithAPIKey(apiKey))
+
+		user, err := client.Users().Get(cmd.Context(), userID)
+		if err != nil {
+			return fmt.Errorf("failed to get user: %w", err)
 		}
 
-		return outputUser(user)
+		var output map[string]interface{}
+		data, _ := json.Marshal(user)
+		json.Unmarshal(data, &output)
+
+		return outputUser(output)
 	},
 }
 
@@ -88,7 +99,17 @@ var usersCreateCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
 		}
 
-		fmt.Printf("✓ Created user: %s <%s>\n", name, email)
+		client := luna.NewClient(luna.WithAPIKey(apiKey))
+
+		user, err := client.Users().Create(cmd.Context(), luna.UserCreate{
+			Name:  name,
+			Email: email,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create user: %w", err)
+		}
+
+		fmt.Printf("✓ Created user: %s <%s> (%s)\n", user.Name, user.Email, user.ID)
 		return nil
 	},
 }
@@ -104,6 +125,13 @@ var usersDeleteCmd = &cobra.Command{
 		apiKey := getAPIKey()
 		if apiKey == "" {
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
+		}
+
+		client := luna.NewClient(luna.WithAPIKey(apiKey))
+
+		err := client.Users().Delete(cmd.Context(), userID)
+		if err != nil {
+			return fmt.Errorf("failed to delete user: %w", err)
 		}
 
 		fmt.Printf("✓ Deleted user: %s\n", userID)

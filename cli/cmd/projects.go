@@ -6,6 +6,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/eclipse-softworks/luna-sdk-go/luna"
 	"github.com/spf13/cobra"
 	yaml "gopkg.in/yaml.v3"
 )
@@ -31,13 +32,21 @@ var projectsListCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
 		}
 
-		// Mock response for demonstration
-		projects := []map[string]interface{}{
-			{"id": "prj_abc123", "name": "Project Alpha", "owner_id": "usr_xyz", "created_at": "2024-01-15"},
-			{"id": "prj_def456", "name": "Project Beta", "owner_id": "usr_xyz", "created_at": "2024-01-16"},
+		client := luna.NewClient(luna.WithAPIKey(apiKey))
+
+		projects, err := client.Projects().List(cmd.Context(), &luna.ListParams{
+			Limit:  limit,
+			Cursor: cursor,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to list projects: %w", err)
 		}
 
-		return outputProjects(projects)
+		var output []map[string]interface{}
+		data, _ := json.Marshal(projects.Data)
+		json.Unmarshal(data, &output)
+
+		return outputProjects(output)
 	},
 }
 
@@ -54,17 +63,18 @@ var projectsGetCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
 		}
 
-		// Mock response for demonstration
-		project := map[string]interface{}{
-			"id":          projectID,
-			"name":        "Project Alpha",
-			"description": "A sample project",
-			"owner_id":    "usr_xyz",
-			"created_at":  "2024-01-15",
-			"updated_at":  "2024-01-15",
+		client := luna.NewClient(luna.WithAPIKey(apiKey))
+
+		project, err := client.Projects().Get(cmd.Context(), projectID)
+		if err != nil {
+			return fmt.Errorf("failed to get project: %w", err)
 		}
 
-		return outputProject(project)
+		var output map[string]interface{}
+		data, _ := json.Marshal(project)
+		json.Unmarshal(data, &output)
+
+		return outputProject(output)
 	},
 }
 
@@ -85,9 +95,19 @@ var projectsCreateCmd = &cobra.Command{
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
 		}
 
-		fmt.Printf("✓ Created project: %s\n", name)
-		if description != "" {
-			fmt.Printf("  Description: %s\n", description)
+		client := luna.NewClient(luna.WithAPIKey(apiKey))
+
+		project, err := client.Projects().Create(cmd.Context(), luna.ProjectCreate{
+			Name:        name,
+			Description: &description,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create project: %w", err)
+		}
+
+		fmt.Printf("✓ Created project: %s\n", project.Name)
+		if project.Description != nil && *project.Description != "" {
+			fmt.Printf("  Description: %s\n", *project.Description)
 		}
 		return nil
 	},
@@ -104,6 +124,13 @@ var projectsDeleteCmd = &cobra.Command{
 		apiKey := getAPIKey()
 		if apiKey == "" {
 			return fmt.Errorf("not authenticated. Run 'luna auth login' or set LUNA_API_KEY")
+		}
+
+		client := luna.NewClient(luna.WithAPIKey(apiKey))
+
+		err := client.Projects().Delete(cmd.Context(), projectID)
+		if err != nil {
+			return fmt.Errorf("failed to delete project: %w", err)
 		}
 
 		fmt.Printf("✓ Deleted project: %s\n", projectID)
