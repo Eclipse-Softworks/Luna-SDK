@@ -51,11 +51,11 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/eclipse-softworks/luna-sdk.git",
+        "url": "git+https://github.com/Eclipse-Softworks/Luna-SDK.git",
         "directory": "packages/typescript"
     },
     "bugs": {
-        "url": "https://github.com/eclipse-softworks/luna-sdk/issues"
+        "url": "https://github.com/Eclipse-Softworks/Luna-SDK/issues"
     },
     "homepage": "https://github.com/eclipse-softworks/luna-sdk#readme",
     "devDependencies": {
