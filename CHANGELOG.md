@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key authentication (`lk_<env>_<key>` format)
 - OAuth token authentication with automatic refresh
 - Users and Projects resource support (CRUD operations)
+- Pagination tooling with async iterators (`iterate()` helpers)
 - Secure storage integration (`keytar`, `keyring`, `zalando/go-keyring`)
 - Standardized error handling with specific error types (`AuthenticationError`, etc.)
 - Automatic retry with exponential backoff and jitter
