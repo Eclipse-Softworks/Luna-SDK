@@ -123,19 +123,13 @@ jobs:
         working-directory: packages/typescript
         run: npm ci
       
-      - name: Create .npmrc
-        working-directory: packages/typescript
-        run: |
-          echo "@eclipse-softworks:registry=https://registry.npmjs.org/" > .npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
-      
       - name: Publish to npm
         working-directory: packages/typescript
         run: |
           if [[ "${{ needs.validate.outputs.is_prerelease }}" == "true" ]]; then
-            npm publish --tag next --access public --userconfig .npmrc
+            npm publish --tag next --access public
           else
-            npm publish --access public --userconfig .npmrc
+            npm publish --access public
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
