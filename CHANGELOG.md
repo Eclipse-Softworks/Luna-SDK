@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2025-12-09
+
+### Changed
+#### Documentation
+- **UI Overhaul**: Redesigned landing page with modern dark theme and glassmorphism
+- Added animated components using `framer-motion`
+- Added feature icons using `react-icons`
+- Improved typography (Inter font) and spacing
+
 ## [1.0.1] - 2025-12-09
 
 ### Added
