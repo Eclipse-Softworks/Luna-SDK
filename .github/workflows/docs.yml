@@ -33,7 +33,7 @@ jobs:
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          accountId: dced67ad0bbbea0d46ae0158c3239d37
           projectName: luna-sdk
           directory: docs/build
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
