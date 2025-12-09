@@ -2,9 +2,9 @@
 
 > **Eclipse Softworks** — Cross-Language SDK for Platform Services
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-v1.0.0-blue)](./packages/typescript)
-[![Python](https://img.shields.io/badge/Python-v1.0.0-blue)](./packages/python)
-[![Go](https://img.shields.io/badge/Go-v1.0.0-blue)](./packages/go)
+[![TypeScript](https://img.shields.io/badge/TypeScript-v1.0.1-blue)](./packages/typescript)
+[![Python](https://img.shields.io/badge/Python-v1.0.1-blue)](./packages/python)
+[![Go](https://img.shields.io/badge/Go-v1.0.1-blue)](./packages/go)
 
 ## Overview
 
@@ -14,7 +14,7 @@ Luna SDK provides official client libraries for the Eclipse Softworks Platform A
 
 ### TypeScript
 ```bash
-npm install @eclipse/luna-sdk
+npm install @eclipse-softworks/luna-sdk
 ```
 
 ### Python
@@ -31,7 +31,7 @@ go get github.com/eclipse-softworks/luna-sdk-go
 
 ### TypeScript
 ```typescript
-import { LunaClient } from '@eclipse/luna-sdk';
+import { LunaClient } from '@eclipse-softworks/luna-sdk';
 
 const client = new LunaClient({
   apiKey: process.env.LUNA_API_KEY,
@@ -60,12 +60,12 @@ users, err := client.Users().List(ctx)
 
 ## Documentation
 
-- [Getting Started](./docs/README.md)
-- [Installation](./docs/installation.md)
-- [Authentication](./docs/authentication.md)
-- [Service Modules](./docs/services.md)
-- [Error Reference](./docs/errors.md)
-- [Versioning](./docs/versioning.md)
+Full documentation is available at **[docs-lunasdk.eclipse-softworks.com](https://docs-lunasdk.eclipse-softworks.com)**.
+
+- [Getting Started](https://docs-lunasdk.eclipse-softworks.com/docs/intro)
+- [Authentication](https://docs-lunasdk.eclipse-softworks.com/docs/authentication)
+- [Service Modules](https://docs-lunasdk.eclipse-softworks.com/docs/services)
+- [Error Reference](https://docs-lunasdk.eclipse-softworks.com/docs/errors)
 
 ## CLI
 
