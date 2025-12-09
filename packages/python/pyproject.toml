@@ -1,6 +1,6 @@
 [project]
 name = "luna-sdk"
-version = "1.0.0"
+version = "1.0.1"
 description = "Official Python SDK for the Eclipse Softworks Platform API"
 readme = "README.md"
 license = {text = "MIT"}

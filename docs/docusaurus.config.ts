@@ -89,7 +89,7 @@ const config: Config = {
             },
             {
               label: 'Eclipse Softworks',
-              href: 'https://eclipse-softworks.com',
+              href: 'https://www.eclipse-softworks.com',
             },
           ],
         },
