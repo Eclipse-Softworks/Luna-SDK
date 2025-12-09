@@ -7,10 +7,8 @@
 [![Go](https://img.shields.io/badge/Go-v1.0.1-blue)](./packages/go)
 
 ## Overview
-<img width="1586" height="8120" alt="go_basic" src="https://github.com/user-attachments/assets/fbf99fa7-d5d2-4618-a906-64f8b62d83b4" />
-<img width="1462" height="6752" alt="py_basic" src="https://github.com/user-attachments/assets/d7db6ad0-c73d-41c4-a0bd-a7ebeb4d6acb" />
-<img width="1416" height="5688" alt="ts_basic" src="https://github.com/user-attachments/assets/cbf91793-8f09-4e5f-881b-b51fbe94fd81" />
 Luna SDK provides official client libraries for the Eclipse Softworks Platform API. Available in TypeScript, Python, and Go with consistent patterns across all languages.
+<img width="1462" height="6752" alt="py_basic" src="https://github.com/user-attachments/assets/6cd6d8d9-9217-46c7-a510-db3026ea9bed" />
 
 
 ## Installation
