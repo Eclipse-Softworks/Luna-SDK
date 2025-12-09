@@ -1,31 +1,41 @@
-# Luna SDK Documentation
+# Website
 
-Welcome to the official documentation for the **Luna SDK**, the developer toolkit for the Eclipse Softworks Platform.
+This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
 
-## Overview
+## Installation
 
-Luna SDK provides pragmatic, idiomatic client libraries for **TypeScript**, **Python**, and **Go**, enabling seamless integration with Eclipse Softworks services.
+```bash
+yarn
+```
 
-### Key Features
+## Local Development
 
-- **Idiomatic Clients**: Native feel in every language.
-- **Production-Grade**: Built-in retries, pagination, and heavy testing.
-- **Type-Safe**: Full typing support (TypeScript sources, Pydantic models, Go structs).
-- **Secure**: Sensitive data redaction and secure token storage.
-- **Multi-Service**: Support for Identity, Storage, AI, Automation, and more.
+```bash
+yarn start
+```
 
-## Quick Links
+This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
 
-- [Installation Guide](./installation.md)
-- [Authentication](./authentication.md)
-- [Service Modules](./services.md)
-- [Error Handling](./errors.md)
-- [Versioning Policy](./versioning.md)
+## Build
 
-## SDK Status
+```bash
+yarn build
+```
 
-| Language | Package | Version | Status |
-|----------|---------|---------|--------|
-| **TypeScript** | `@eclipse/luna-sdk` | `1.0.0` | ✅ Stable |
-| **Python** | `luna-sdk` | `1.0.0` | ✅ Stable |
-| **Go** | `github.com/eclipse-softworks/luna-sdk-go` | `v1.0.0` | ✅ Stable |
+This command generates static content into the `build` directory and can be served using any static contents hosting service.
+
+## Deployment
+
+Using SSH:
+
+```bash
+USE_SSH=true yarn deploy
+```
+
+Not using SSH:
+
+```bash
+GIT_USER=<Your GitHub username> yarn deploy
+```
+
+If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.

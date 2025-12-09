@@ -22,4 +22,4 @@ When a feature is deprecated:
 
 ## Changelog
 
-See [CHANGELOG.md](../CHANGELOG.md) for the full history of changes.
+See [CHANGELOG.md](https://github.com/Eclipse-Softworks/Luna-SDK/blob/master/CHANGELOG.md) for the full history of changes.
