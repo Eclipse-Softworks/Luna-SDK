@@ -2,22 +2,22 @@
 # These users/teams will be automatically requested for review
 
 # Global owners
-* @eclipse-softworks/
+* @eclipse-softworks
 
 # TypeScript SDK
-/packages/typescript/ @eclipse-softworks/
+/packages/typescript/ @eclipse-softworks
 
 # Python SDK
-/packages/python/ @eclipse-softworks/
+/packages/python/ @eclipse-softworks
 
 # Go SDK
-/packages/go/ @eclipse-softworks/
+/packages/go/ @eclipse-softworks
 
 # CLI
-/cli/ @eclipse-softworks/
+/cli/ @eclipse-softworks
 
 # Documentation
-/docs/ @eclipse-softworks/
+/docs/ @eclipse-softworks
 
 # CI/CD
-/.github/ @eclipse-softworks/
+/.github/ @eclipse-softworks
