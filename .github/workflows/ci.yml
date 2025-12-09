@@ -100,7 +100,7 @@ jobs:
         run: npm run test:coverage
       
       - name: Upload coverage report
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: packages/typescript/coverage/lcov.info
           flags: typescript
@@ -163,7 +163,7 @@ jobs:
         run: pytest --cov=luna --cov-report=xml
       
       - name: Upload coverage report
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: matrix.python-version == '3.11'
         with:
           files: packages/python/coverage.xml
@@ -231,7 +231,7 @@ jobs:
         run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
       
       - name: Upload coverage report
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: packages/go/coverage.out
           flags: go
