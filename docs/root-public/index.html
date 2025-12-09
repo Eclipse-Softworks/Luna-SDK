@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eclipse Softworks Documentation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #1b1b1d;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 20px;
+        }
+        .logo {
+            margin-bottom: 2rem;
+            width: 120px;
+            height: 120px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #a5b4fc, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p.subtitle {
+            font-size: 1.2rem;
+            color: #a1a1aa;
+            margin-bottom: 3rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+        .card {
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 12px;
+            padding: 24px;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: #6366f1;
+            background: #2f2f35;
+        }
+        .card h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+        }
+        .card p {
+            margin: 0;
+            color: #a1a1aa;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .footer {
+            margin-top: 4rem;
+            color: #52525b;
+            font-size: 0.8rem;
+        }
+        a { color: inherit; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Optional: Place logo here if available -->
+        <!-- <img src="/luna-sdk/img/logo.svg" alt="Eclipse Softworks" class="logo"> -->
+        
+        <h1>Eclipse Softworks Documentation</h1>
+        <p class="subtitle">Official resources for our platforms and SDKs.</p>
+
+        <div class="grid">
+            <a href="/luna-sdk/" class="card">
+                <h2>Luna SDK &rarr;</h2>
+                <p>The official TypeScript, Python, and Go SDKs for the Eclipse Softworks Platform.</p>
+            </a>
+            
+            <!-- Future Project Placeholder -->
+            <!--
+            <a href="#" class="card" style="opacity: 0.5; cursor: default;">
+                <h2>Solar API (Coming Soon)</h2>
+                <p>Next-generation renewable energy data platform.</p>
+            </a>
+            -->
+        </div>
+
+        <div class="footer">
+            &copy; 2025 Eclipse Softworks. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

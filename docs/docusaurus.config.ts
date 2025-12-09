@@ -10,7 +10,7 @@ const config: Config = {
   // Production URL
   url: 'https://docs.eclipse-softworks.com',
   // Sub-path for the site
-  baseUrl: '/',
+  baseUrl: '/luna-sdk/',
 
   // GitHub config
   organizationName: 'Eclipse-Softworks',
