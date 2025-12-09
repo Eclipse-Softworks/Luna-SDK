@@ -8,9 +8,9 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   // Production URL
-  url: 'https://docs.eclipse-softworks.com',
+  url: 'https://docs-lunasdk.eclipse-softworks.com',
   // Sub-path for the site
-  baseUrl: '/luna-sdk/',
+  baseUrl: '/',
 
   // GitHub config
   organizationName: 'Eclipse-Softworks',
