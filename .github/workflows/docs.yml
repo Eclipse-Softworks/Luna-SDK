@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy to Cloudflare Pages
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -33,7 +33,7 @@ jobs:
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: dced67ad0bbbea0d46ae0158c3239d37
+          accountId: 'dced67ad0bbbea0d46ae0158c3239d37'
           projectName: luna-sdk
           directory: docs/build
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
