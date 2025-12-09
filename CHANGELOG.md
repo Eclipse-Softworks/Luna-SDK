@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 #### Documentation
-- Launched official documentation site at [docs.eclipse-softworks.com](https://docs.eclipse-softworks.com/)
+- Launched official documentation site at [docs.eclipse-softworks.com](https://docs-lunasdk.eclipse-softworks.com/)
 - Integrated Docusaurus with Cloudflare Pages for continuous deployment
 
 #### CI/CD
