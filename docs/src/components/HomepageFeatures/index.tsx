@@ -9,7 +9,7 @@ import { FiShield, FiZap, FiGlobe } from 'react-icons/fi';
 type FeatureItem = {
   title: string;
   icon: React.ComponentType<React.ComponentProps<'svg'>>;
-  description: JSX.Element;
+  description: React.ReactNode;
 };
 
 const FeatureList: FeatureItem[] = [
@@ -59,7 +59,7 @@ function Feature({ title, icon: Icon, description }: FeatureItem) {
   );
 }
 
-export default function HomepageFeatures(): JSX.Element {
+export default function HomepageFeatures(): React.JSX.Element {
   return (
     <section className={styles.features} style={{ padding: '4rem 0' }}>
       <div className="container">
