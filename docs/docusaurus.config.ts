@@ -42,7 +42,20 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/social-card.png',
+    metadata: [
+      { name: 'description', content: 'Official TypeScript, Python, and Go SDKs for the Eclipse Softworks Platform. Type-safe, production-ready client libraries.' },
+      { name: 'keywords', content: 'Luna SDK, Eclipse Softworks, TypeScript SDK, Python SDK, Go SDK, API Client' },
+      { property: 'og:title', content: 'Luna SDK - Eclipse Softworks' },
+      { property: 'og:description', content: 'Official multi-language SDKs for the Eclipse Softworks Platform API.' },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: 'https://docs-lunasdk.eclipse-softworks.com' },
+      { property: 'og:image', content: 'https://docs-lunasdk.eclipse-softworks.com/img/social-card.png' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: 'Luna SDK - Eclipse Softworks' },
+      { name: 'twitter:description', content: 'Official SDKs for TypeScript, Python, and Go.' },
+      { name: 'twitter:image', content: 'https://docs-lunasdk.eclipse-softworks.com/img/social-card.png' },
+    ],
     colorMode: {
       defaultMode: 'dark',
       disableSwitch: false,
