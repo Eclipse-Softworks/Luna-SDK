@@ -30,12 +30,9 @@ jobs:
           npm run build
 
       - name: Publish to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 'dced67ad0bbbea0d46ae0158c3239d37'
-          projectName: luna-sdk
-          directory: docs/build
+          command: pages deploy docs/build --project-name=luna-sdk
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
-          workingDirectory: docs
