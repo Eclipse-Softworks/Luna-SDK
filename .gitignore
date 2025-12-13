@@ -1,0 +1,26 @@
+# Node
+node_modules/
+dist/
+coverage/
+.npm/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+venv/
+.venv/
+env/
+.env
+
+# Go
+bin/
+*.exe
+*.test
+vendor/
+
+# General
+.DS_Store
+.idea/
+.vscode/
+*.log

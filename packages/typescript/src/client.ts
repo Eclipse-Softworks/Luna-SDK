@@ -7,6 +7,9 @@ import { IdentityResource } from './resources/identity.js';
 import { StorageResource } from './resources/storage.js';
 import { AiResource } from './resources/ai.js';
 import { AutomationResource } from './resources/automation.js';
+import { Payments, type PaymentsConfig } from './resources/payments/index.js';
+import { Messaging, type MessagingConfig } from './resources/messaging/index.js';
+import { ZATools, type ZAToolsConfig } from './resources/za-tools/index.js';
 import { ConsoleLogger, type Logger, type LogLevel, type TelemetryConfig } from './telemetry/index.js';
 
 /**
@@ -33,6 +36,12 @@ export interface ClientConfig {
     logLevel?: LogLevel;
     /** Telemetry configuration */
     telemetry?: TelemetryConfig;
+    /** Payment gateway configurations */
+    payments?: PaymentsConfig;
+    /** Messaging configurations (SMS, WhatsApp, USSD) */
+    messaging?: MessagingConfig;
+    /** South African business tools configuration */
+    zaTools?: ZAToolsConfig;
 }
 
 /**
@@ -101,6 +110,15 @@ export class LunaClient {
     /** Automation resource */
     public readonly automation: AutomationResource;
 
+    /** Payments resource (SA gateways) */
+    public readonly payments: Payments;
+
+    /** Messaging resource (SMS, WhatsApp, USSD) */
+    public readonly messaging: Messaging;
+
+    /** South African business tools (CIPC, B-BBEE, ID, Address) */
+    public readonly zaTools: ZATools;
+
     constructor(config: ClientConfig) {
         // Validate config
         if (!config.apiKey && !config.accessToken) {
@@ -139,6 +157,9 @@ export class LunaClient {
         this.storage = new StorageResource(this.httpClient);
         this.ai = new AiResource(this.httpClient);
         this.automation = new AutomationResource(this.httpClient);
+        this.payments = new Payments(this.httpClient, config.payments ?? {});
+        this.messaging = new Messaging(this.httpClient, config.messaging ?? {});
+        this.zaTools = new ZATools(this.httpClient, config.zaTools ?? {});
 
         this.logger.debug('LunaClient initialized', {
             baseUrl: config.baseUrl ?? DEFAULT_BASE_URL,

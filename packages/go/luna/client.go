@@ -14,11 +14,15 @@ package luna
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/eclipse-softworks/luna-sdk-go/luna/auth"
 	"github.com/eclipse-softworks/luna-sdk-go/luna/errors"
 	lunahttp "github.com/eclipse-softworks/luna-sdk-go/luna/http"
 	"github.com/eclipse-softworks/luna-sdk-go/luna/resources"
+	"github.com/eclipse-softworks/luna-sdk-go/luna/resources/messaging"
+	"github.com/eclipse-softworks/luna-sdk-go/luna/resources/payments"
+	"github.com/eclipse-softworks/luna-sdk-go/luna/resources/zatools"
 	"github.com/eclipse-softworks/luna-sdk-go/luna/telemetry"
 )
 
@@ -88,6 +92,10 @@ type clientConfig struct {
 	logLevel             telemetry.LogLevel
 	tokenRefreshCallback func(auth.TokenPair) error
 	httpClient           *lunahttp.Client
+	paymentsConfig       *payments.Config
+	messagingConfig      *messaging.Config
+	zatoolsConfig        *zatools.Config
+	strict               bool
 }
 
 // Client is the main Luna SDK client
@@ -101,6 +109,9 @@ type Client struct {
 	storage    *resources.StorageResource
 	ai         *resources.AiResource
 	automation *resources.AutomationResource
+	payments   *payments.Payments
+	messaging  *messaging.Messaging
+	zaTools    *zatools.ZATools
 }
 
 // NewClient creates a new Luna SDK client
@@ -114,6 +125,21 @@ func NewClient(opts ...Option) (*Client, error) {
 
 	for _, opt := range opts {
 		opt(config)
+	}
+
+	// Auto-configure from environment ("Spring Boot" style)
+	if config.apiKey == "" {
+		config.apiKey = os.Getenv("LUNA_API_KEY")
+	}
+	if config.accessToken == "" {
+		config.accessToken = os.Getenv("LUNA_ACCESS_TOKEN")
+	}
+	// Only override base URL from env if it's currently the default
+	if envURL := os.Getenv("LUNA_BASE_URL"); envURL != "" && config.baseURL == "https://api.eclipse.dev" {
+		config.baseURL = envURL
+	}
+	if envEnv := os.Getenv("LUNA_ENV"); envEnv != "" {
+		// Example: could switch to sandbox if LUNA_ENV=dev
 	}
 
 	// Validate config
@@ -177,6 +203,17 @@ func NewClient(opts ...Option) (*Client, error) {
 	client.ai = resources.NewAiResource(httpClient)
 	client.automation = resources.NewAutomationResource(httpClient)
 
+	// Initialize SA-specific resources
+	if config.zatoolsConfig == nil {
+		config.zatoolsConfig = &zatools.Config{}
+	}
+	// Propagate strict mode
+	config.zatoolsConfig.Strict = config.strict
+
+	client.payments = payments.NewPayments(httpClient, config.paymentsConfig)
+	client.messaging = messaging.NewMessaging(httpClient, config.messagingConfig)
+	client.zaTools = zatools.NewZATools(httpClient, config.zatoolsConfig)
+
 	logger.Debug("LunaClient initialized", map[string]interface{}{
 		"base_url":  config.baseURL,
 		"auth_type": getAuthType(config),
@@ -218,6 +255,21 @@ func (c *Client) AI() *resources.AiResource {
 // Automation returns the Automation resource
 func (c *Client) Automation() *resources.AutomationResource {
 	return c.automation
+}
+
+// Payments returns the Payments resource (SA payment gateways)
+func (c *Client) Payments() *payments.Payments {
+	return c.payments
+}
+
+// Messaging returns the Messaging resource (SMS, WhatsApp, USSD)
+func (c *Client) Messaging() *messaging.Messaging {
+	return c.messaging
+}
+
+// ZATools returns the ZA Tools resource (SA business tools)
+func (c *Client) ZATools() *zatools.ZATools {
+	return c.zaTools
 }
 
 // WithAPIKey sets the API key for authentication
@@ -274,6 +326,13 @@ func WithLogger(logger telemetry.Logger) Option {
 func WithHTTPClient(client *lunahttp.Client) Option {
 	return func(c *clientConfig) {
 		c.httpClient = client
+	}
+}
+
+// WithStrictMode enables client-side validation ("Rust" style safety)
+func WithStrictMode() Option {
+	return func(c *clientConfig) {
+		c.strict = true
 	}
 }
 

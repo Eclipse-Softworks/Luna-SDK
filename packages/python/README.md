@@ -1,81 +1,83 @@
-# luna-sdk
+# Luna SDK for Python
 
-Official Python SDK for the Eclipse Softworks Platform API.
+Official Python SDK for the Eclipse Softworks Platform API, optimized for high performance and South African market integration.
 
 ## Installation
 
 ```bash
-pip install luna-sdk
+pip install eclipse-luna-sdk
 ```
 
 ## Quick Start
 
 ```python
-import asyncio
+import os
 from luna import LunaClient
 
+# AUTO-CONFIGURATION ("Spring Boot" style)
+# The client automatically reads LUNA_API_KEY and LUNA_BASE_URL from os.environ
+# No need to pass arguments if environment variables are set.
+client = LunaClient()
+
 async def main():
-    # API Key authentication
-    async with LunaClient(api_key="lk_live_xxxx") as client:
-        # List users
-        users = await client.users.list(limit=10)
-        
-        # Get a specific user
-        user = await client.users.get("usr_123")
-        
-        # Create a new user
-        from luna import UserCreate
-        new_user = await client.users.create(
-            UserCreate(email="john@example.com", name="John Doe")
+    async with client:
+        # 1. South African Payments
+        payment = await client.payments.payfast.create_payment(
+            amount=199.99,
+            item_name="Premium Plan",
+            return_url="https://example.com/ok"
+        )
+        print(f"Pay URL: {payment.url}")
+
+        # 2. Messaging
+        await client.messaging.whatsapp.send_template(
+            to="+27820000000",
+            template="welcome_message",
+            parameters=["John"]
         )
 
-asyncio.run(main())
+        # 3. ZA Tools (Strict Mode Example)
+        # Validate ID format locally before API call
+        id_info = client.za_tools.validate_id("9001015009087")
+        if id_info.is_valid:
+            print(f"User is {id_info.gender}, born {id_info.date_of_birth}")
+
+        # CIPC Lookup
+        company = await client.za_tools.cipc.lookup("2020/123456/07")
+        if company:
+            print(f"Company: {company.name} ({company.status})")
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
 ```
 
-## Authentication
+## Features
 
-### API Key
+### 🚀 High-Performance Architecture
+*   **Auto-Configuration**: Zero-code initialization using `LUNA_API_KEY` / `LUNA_ACCESS_TOKEN`.
+*   **Strict Mode** ("Rust-like Safety"): Enable strict client-side validation for critical SA data (ID checksums, Tax refs) to catch errors before network calls.
+*   **Connection Pooling** ("C-like Speed"): Optimized `httpx` transport with tuned keep-alive (`max_keepalive=20`) and connection limits (`max_connections=100`) for high-throughput applications.
 
-```python
-client = LunaClient(api_key="lk_live_xxxx")
-```
-
-### OAuth Token
-
-```python
-async def save_tokens(tokens):
-    # Save tokens to database
-    pass
-
-client = LunaClient(
-    access_token=session.access_token,
-    refresh_token=session.refresh_token,
-    on_token_refresh=save_tokens,
-)
-```
-
-## Error Handling
-
-```python
-from luna import LunaClient, NotFoundError, RateLimitError
-
-try:
-    await client.users.get("usr_nonexistent")
-except NotFoundError as e:
-    print(f"User not found: {e.message}")
-except RateLimitError as e:
-    print(f"Rate limited, retry after: {e.retry_after}")
-```
+### 🇿🇦 South African Market Ready
+*   **Payments**: PayFast, Ozow, Yoco, PayShap.
+*   **Messaging**: SMS (Clickatell/Africa's Talking), WhatsApp, USSD.
+*   **ZA Tools**: CIPC, B-BBEE, ID & Address Validation.
 
 ## Configuration
 
+### Strict Mode & Performance
+
 ```python
 client = LunaClient(
-    api_key="lk_live_xxxx",
-    base_url="https://api.staging.eclipse.dev",
-    timeout=60.0,
-    max_retries=5,
-    log_level="debug",
+    # Explicit config (optional if env vars set)
+    api_key="lk_live_...",
+    
+    # Enable Strict Validation
+    strict=True,
+    
+    # Connection Config (Optimized defaults are used automatically)
+    timeout=30.0,
 )
 ```
 

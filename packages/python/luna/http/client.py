@@ -55,7 +55,9 @@ class HttpClient:
     async def _get_client(self) -> httpx.AsyncClient:
         """Get or create HTTP client."""
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=self._timeout)
+            # "Speed like C" - Optimized Connection Pooling
+            limits = httpx.Limits(max_keepalive_connections=20, max_connections=100)
+            self._client = httpx.AsyncClient(timeout=self._timeout, limits=limits)
         return self._client
 
     async def close(self) -> None:

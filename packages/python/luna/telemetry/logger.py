@@ -19,6 +19,13 @@ REDACT_PATTERNS = [
     re.compile(r"secret", re.IGNORECASE),
     re.compile(r"token", re.IGNORECASE),
     re.compile(r"bearer", re.IGNORECASE),
+    # POPIA / SA Specific
+    re.compile(r"id[_-]?number", re.IGNORECASE),
+    re.compile(r"tax[_-]?ref", re.IGNORECASE),
+    re.compile(r"registration[_-]?number", re.IGNORECASE),
+    re.compile(r"account[_-]?number", re.IGNORECASE),
+    re.compile(r"cvv", re.IGNORECASE),
+    re.compile(r"pan", re.IGNORECASE),
 ]
 
 

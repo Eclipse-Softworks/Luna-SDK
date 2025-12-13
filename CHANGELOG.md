@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-12-13
+
+### Added
+
+#### South African Payments Module
+- **PayFast**: Payment creation, webhook verification, refund processing
+- **Ozow**: Instant EFT payment integration with hash verification
+- **Yoco**: Checkout API, webhook handling, refund functionality
+- **PayShap**: Real-time payments, ShapID lookup, QR code generation
+
+#### Communications Module
+- **SMS**: Multi-provider support (Clickatell, Africa's Talking, Twilio)
+- **WhatsApp**: Business API integration (text, templates, media messages)
+- **USSD**: Interactive menu support for SA networks (MTN, Vodacom, Cell C, Telkom)
+
+#### AI/ML Expansion
+- Multi-provider LLM support (OpenAI, Anthropic, Google Gemini, Ollama, Azure)
+- Text embeddings with cosine similarity utilities
+- Image analysis and vision capabilities
+- South African language translation (isiZulu, isiXhosa, Afrikaans, Sepedi, Sesotho, Setswana, Xitsonga, Tshivenda, siSwati, isiNdebele)
+
+#### South African Business Tools
+- **CIPC**: Company registration lookup and verification
+- **B-BBEE**: Compliance verification, level calculation, EME/QSE classification
+- **ID Validation**: SA ID number parsing with Luhn checksum, DOB extraction, age verification
+- **Address Utilities**: Postal code lookup, province detection, address validation
+
+### Changed
+- Updated `LunaClient` with new resource modules: `payments`, `messaging`, `zaTools`
+- Expanded `AiResource` with embeddings, vision, and translation methods
+- Enhanced type exports in main `index.ts`
+
+
 ## [1.0.2] - 2025-12-09
 
 ### Changed

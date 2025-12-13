@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Callable, Awaitable
+import os
+from typing import Callable, Awaitable, Optional
 
 from luna.auth import ApiKeyAuth, TokenAuth, AuthProvider
 from luna.http import HttpClient
@@ -12,6 +13,9 @@ from luna.resources.identity import IdentityResource
 from luna.resources.storage import StorageResource
 from luna.resources.ai import AiResource
 from luna.resources.automation import AutomationResource
+from luna.resources.payments import Payments, PaymentsConfig
+from luna.resources.messaging import Messaging, MessagingConfig
+from luna.resources.za_tools import ZATools, ZAToolsConfig
 from luna.telemetry import Logger, ConsoleLogger, LogLevel
 
 
@@ -72,6 +76,10 @@ class LunaClient:
         max_retries: int = 3,
         logger: Logger | None = None,
         log_level: LogLevel = "info",
+        payments: PaymentsConfig | None = None,
+        messaging: MessagingConfig | None = None,
+        za_tools: ZAToolsConfig | None = None,
+        strict: bool = False,
     ) -> None:
         """
         Initialize the Luna client.
@@ -86,9 +94,23 @@ class LunaClient:
             max_retries: Maximum number of retry attempts
             logger: Custom logger instance
             log_level: Log level
+            payments: South African payment gateways configuration
+            messaging: Messaging (SMS, WhatsApp, USSD) configuration
+            za_tools: South African business tools configuration
         """
+        # Auto-configure from environment ("Spring Boot" style)
+        if not api_key:
+            api_key = os.environ.get("LUNA_API_KEY")
+        if not access_token:
+            access_token = os.environ.get("LUNA_ACCESS_TOKEN")
+        
+        # Only override base URL if it's the default and env var is set
+        env_base_url = os.environ.get("LUNA_BASE_URL")
+        if env_base_url and base_url == "https://api.eclipse.dev":
+            base_url = env_base_url
+
         if not api_key and not access_token:
-            raise ValueError("Either api_key or access_token must be provided")
+            raise ValueError("Either api_key or access_token must be provided (or set via LUNA_API_KEY/LUNA_ACCESS_TOKEN)")
 
         # Set up logger
         self._logger = logger or ConsoleLogger(log_level)
@@ -122,6 +144,15 @@ class LunaClient:
         self.storage = StorageResource(self._http_client)
         self.ai = AiResource(self._http_client)
         self.automation = AutomationResource(self._http_client)
+
+        # Initialize SA-specific resources
+        self.payments = Payments(self._http_client, payments)
+        self.messaging = Messaging(self._http_client, messaging)
+        
+        if za_tools is None:
+            za_tools = ZAToolsConfig()
+        za_tools.strict = strict
+        self.za_tools = ZATools(self._http_client, za_tools)
 
         self._logger.debug(
             "LunaClient initialized",
