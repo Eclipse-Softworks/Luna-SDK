@@ -12,6 +12,13 @@ const REDACT_PATTERNS = [
     /secret/i,
     /token/i,
     /bearer/i,
+    // POPIA / SA Specific
+    /id[_-]?number/i,
+    /tax[_-]?ref/i,
+    /registration[_-]?number/i,
+    /account[_-]?number/i,
+    /cvv/i,
+    /pan/i,
 ];
 
 /**

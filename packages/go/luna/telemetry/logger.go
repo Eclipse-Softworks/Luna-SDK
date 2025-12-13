@@ -48,6 +48,13 @@ func NewConsoleLogger(level LogLevel) *ConsoleLogger {
 			regexp.MustCompile(`(?i)secret`),
 			regexp.MustCompile(`(?i)token`),
 			regexp.MustCompile(`(?i)bearer`),
+			// POPIA / SA Specific
+			regexp.MustCompile(`(?i)id[_-]?number`),
+			regexp.MustCompile(`(?i)tax[_-]?ref`),
+			regexp.MustCompile(`(?i)registration[_-]?number`),
+			regexp.MustCompile(`(?i)account[_-]?number`),
+			regexp.MustCompile(`(?i)cvv`),
+			regexp.MustCompile(`(?i)pan`),
 		},
 	}
 }

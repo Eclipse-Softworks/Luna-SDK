@@ -2,46 +2,39 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Introduction
 
-Let's discover **Docusaurus in less than 5 minutes**.
+The **Luna SDK** is the official gateway to the Eclipse Softworks Platform, designed to help developers build high-performance, compliant, and localized applications for the African market.
 
-## Getting Started
+## Key Features
 
-Get started by **creating a new site**.
+### 🇿🇦 South African Market Ready
+*   **Payments**: Native integrations for PayFast, Ozow, Yoco, and PayShap.
+*   **Messaging**: SMS, WhatsApp Business, USSD.
+*   **Business Tools**: CIPC Company Verification, B-BBEE Compliance, ID Validation.
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+### 🚀 High-Performance Architecture
+*   **Auto-Configuration ("Spring Boot")**: Zero-code startup.
+*   **Strict Mode ("Rust")**: Type-safe client-side validation.
+*   **Speed ("C")**: Tuned connection pooling for high throughput.
 
-### What you'll need
+### 🔒 Enterprise Grade
+*   **POPIA Compliance**: Automatic PII redaction (ID numbers, Tax refs) in logs.
+*   **Native SDKs**: TypeScript, Python, and Go.
 
-- [Node.js](https://nodejs.org/en/download/) version 20.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+## Installation
 
-## Generate a new site
-
-Generate a new Docusaurus site using the **classic template**.
-
-The classic template will automatically be added to your project after you run the command:
-
+### TypeScript
 ```bash
-npm init docusaurus@latest my-website classic
+npm install @eclipse/luna-sdk
 ```
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
-
-The command also installs all necessary dependencies you need to run Docusaurus.
-
-## Start your site
-
-Run the development server:
-
+### Python
 ```bash
-cd my-website
-npm run start
+pip install eclipse-luna-sdk
 ```
 
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+### Go
+```bash
+go get github.com/eclipse-softworks/luna-sdk-go
+```

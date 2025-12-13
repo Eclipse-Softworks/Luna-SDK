@@ -41,6 +41,12 @@ func NewClient(config ClientConfig) *Client {
 		config: config,
 		httpClient: &http.Client{
 			Timeout: time.Duration(config.Timeout) * time.Millisecond,
+			// "Speed like C" - Optimized Connection Pooling
+			Transport: &http.Transport{
+				MaxIdleConns:        100,
+				MaxIdleConnsPerHost: 100,
+				IdleConnTimeout:     90 * time.Second,
+			},
 		},
 	}
 }
