@@ -70,7 +70,7 @@ jobs:
         run: npm run build
       
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: typescript-dist
           path: packages/typescript/dist
@@ -258,7 +258,7 @@ jobs:
         run: go build -o luna ./main.go
       
       - name: Upload CLI artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: luna-cli-linux
           path: cli/luna
