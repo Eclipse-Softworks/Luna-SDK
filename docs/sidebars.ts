@@ -16,28 +16,71 @@ const sidebars: SidebarsConfig = {
   // Manual sidebar configuration for optimal ordering
   tutorialSidebar: [
     'intro',
-    'installation',
-    'authentication',
     {
       type: 'category',
-      label: 'Core Modules',
-      items: [
-        'payments',
-        'messaging',
-        'za-tools',
-      ],
-      collapsed: false,
+      label: 'Getting Started',
+      items: ['installation', 'authentication'],
     },
-    'high-performance',
     {
       type: 'category',
-      label: 'Reference',
+      label: 'Core Concepts',
       items: [
-        'services',
+        'core/users',
+        'core/projects',
+        'core/webhooks',
         'errors',
-        'versioning',
       ],
-      collapsed: true,
+    },
+    {
+      type: 'category',
+      label: 'High Performance',
+      items: ['high-performance'],
+    },
+    {
+      type: 'category',
+      label: 'Cross-Platform',
+      items: [
+        'cross-platform/react-native',
+        'cross-platform/electron',
+        'cross-platform/pwa',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Web Frameworks',
+      items: [
+        'web-frameworks/nextjs',
+        'web-frameworks/vue-nuxt',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Developer Tools',
+      items: [
+        'devtools/overview',
+        'devtools/mock-client',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'SDK Reference',
+      items: [
+        {
+          type: 'category',
+          label: 'TypeScript',
+          items: ['reference/typescript/client', 'reference/typescript/configuration'],
+        },
+        {
+          type: 'category',
+          label: 'Python',
+          items: ['reference/python/client', 'reference/python/utilities'],
+        },
+        {
+          type: 'category',
+          label: 'Go',
+          items: ['reference/go/client', 'reference/go/utilities'],
+        },
+      ],
     },
   ],
 };
